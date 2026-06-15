@@ -273,8 +273,15 @@ def generate_pdf(meet_title, heat_sheet, favorites):
                     if name in favorites:
                         name = "* " + name
 
-                    line = f"{lane} {name[:25]:25} {s['age']} {s.get('team','')} {s['seed_time']}"
-                    pdf.cell(0, 5, safe_text(line), ln=1)
+                    # line = f"{lane} {name[:25]:25} {s['age']} {s.get('team','')} {s['seed_time']}"
+                    # pdf.cell(0, 5, safe_text(line), ln=1)
+
+                    pdf.cell(10, 5, str(lane), border=0, align='C')
+                    pdf.cell(60, 5, name[:25], border=0, align='L')
+                    pdf.cell(10, 5, str(s['age']), border=0, align='C')
+                    pdf.cell(40, 5, s.get('team', ''), border=0, align='L')
+                    pdf.cell(30, 5, s['seed_time'], border=0, align='R')
+                    pdf.ln()
 
     return bytes(pdf.output())
 
