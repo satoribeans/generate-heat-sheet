@@ -352,7 +352,7 @@ def generate_pdf(meet_title, heat_sheet, favorites):
                 col = 1
             else:
                 col = 0
-                y += 8 * self. + 5
+                y += 8 * self.line_height + 5
 
     return bytes(pdf.output())
 
