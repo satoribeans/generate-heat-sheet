@@ -319,12 +319,13 @@ def generate_pdf(meet_title, heat_sheet, favorites):
             if y + estimated_height > pdf.h - pdf.b_margin:
                 if col == 0:
                     col = 1
-                    y_right = pdf.get_y()
+                    # y_right = pdf.get_y()
                     x = x_right
                 else:
                     pdf.add_page()
                     col = 0;
                     y_left = pdf.get_y()
+                    y_right = pdf.get_y()
                     x = x_left
                     
                 y = pdf.get_y()
