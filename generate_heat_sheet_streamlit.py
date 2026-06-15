@@ -53,6 +53,7 @@ def extract_meet_title(text):
             title_lines.append(line)
 
     if title_lines:
+        title_lines = re.sub(r"psyc", "heat", title_lines, flags=re.IGNORECASE)
         return " - ".join(title_lines[:3])
 
     return "Swim Meet Heat Sheet"
