@@ -301,21 +301,19 @@ def generate_pdf(meet_title, heat_sheet, favorites):
         x = x_left
         y = pdf.get_y()
 
-        page_column_count = 1;
-        
         for heat in event["heats"]:
             # estimate height (important for page breaks)
             estimated_height = 8 * pdf.line_height + 10
 
             # page break check
             if y + estimated_height > pdf.h - pdf.b_margin:
-                page_column_count += 1
-                if page_column_count / 2 == 1:
+                col += 1
+                # if already two columns, create a new page
+                if col == 2:
+                    col = 0
                     pdf.add_page()
-                    page_column_count = 1
-                
+
                 y = pdf.get_y()
-                col = 1
 
             # decide column
             x = x_left if col == 0 else x_right
