@@ -291,7 +291,7 @@ def generate_pdf(meet_title, heat_sheet, favorites):
     top_y = pdf.get_y()
     
     # ---------------- HEAT SHEETS ----------------
-    for event in heat_sheet:
+    for event in reverse(heat_sheet):
         # --- EVENT HEADER (full width) ---
         pdf.set_font("Helvetica", "B", 10)
         start_y = pdf.get_y()
