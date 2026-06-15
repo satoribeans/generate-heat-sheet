@@ -242,10 +242,10 @@ class PDF(FPDF):
 
             self.set_x(x)
             self.cell(5, self.line_height, str(lane), 0, 0, 'C')
-            self.cell(30, self.line_height, name, 0, 0, 'L')
-            self.cell(8, self.line_height, str(s['age']), 0, 0, 'C')
-            self.cell(20, self.line_height, s.get('team', '')[:8], 0, 0, 'L')
-            self.cell(20, self.line_height, s['seed_time'], 0, 1, 'R')
+            self.cell(50, self.line_height, name, 0, 0, 'L')
+            self.cell(5, self.line_height, str(s['age']), 0, 0, 'C')
+            self.cell(15, self.line_height, s.get('team', '')[:8], 0, 0, 'L')
+            self.cell(25, self.line_height, s['seed_time'], 0, 1, 'R')
 
         return self.get_y() - start_y   # return height ONLY
 
@@ -296,7 +296,7 @@ def generate_pdf(meet_title, heat_sheet, favorites):
     
     # ---------------- HEAT SHEETS ----------------
     for event in heat_sheet:
-        pdf.set_font("Helvetica", "B", 11)
+        pdf.set_font("Helvetica", "B", 10)
         pdf.multi_cell(0, 6, safe_text(f"Event {event['number']}: {event['name']}"))
 
         for heat in event["heats"]:
@@ -306,9 +306,11 @@ def generate_pdf(meet_title, heat_sheet, favorites):
             # pick correct column position
             if col == 0:
                 x = x_left
+                y_left = pdf.get_y()
                 y = y_left
             else:
                 x = x_right
+                y_right = pdf.get_y()
                 y = y_right
 
             # page break check based on correct column y
