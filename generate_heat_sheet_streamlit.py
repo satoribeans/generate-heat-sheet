@@ -221,9 +221,13 @@ class PDF(FPDF):
         self.ln(2)
 
     # --- define page geometry ---
-    page_width = pdf.w - 2 * pdf.l_margin
-    col_width = page_width / 2
-    line_height = 5
+    def __init__(self):
+        super().__init__()
+        self.line_height = 5
+        self.page_width = pdf.w - 2 * pdf.l_margin
+        self.col_width = page_width / 2
+        
+        line_height = 5
 
 # --- print heat as a block ---
 def print_heat(pdf, heat, x, y):
