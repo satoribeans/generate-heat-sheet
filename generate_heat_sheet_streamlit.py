@@ -36,6 +36,7 @@ def extract_meet_title(text):
     title_lines = []
     for line in lines[:30]:  # only scan top of doc
         line = line.strip()
+        line = re.sub(r"psyc", "heat", title_lines, flags=re.IGNORECASE)
 
         if not line:
             continue
@@ -53,7 +54,6 @@ def extract_meet_title(text):
             title_lines.append(line)
 
     if title_lines:
-        title_lines = re.sub(r"psyc", "heat", title_lines, flags=re.IGNORECASE)
         return " - ".join(title_lines[:3])
 
     return "Swim Meet Heat Sheet"
