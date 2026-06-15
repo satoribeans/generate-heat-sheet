@@ -297,11 +297,16 @@ def generate_pdf(meet_title, heat_sheet, favorites):
     
     # ---------------- HEAT SHEETS ----------------
     for event in heat_sheet:
+        # --- EVENT HEADER (full width) ---
         pdf.set_font("Helvetica", "B", 10)
+        start_y = pdf.get_y()
         pdf.multi_cell(0, 6, safe_text(f"Event {event['number']}: {event['name']}"))
-        if col == 0:
+        header_h = pdf.get_y() - start_y
+
+        # sync both columns after header
+        # if col == 0:
             y_left = pdf.get_y()
-        else:
+        # else:
             y_right = pdf.get_y()
 
         for heat in event["heats"]:
