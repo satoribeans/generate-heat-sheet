@@ -224,185 +224,157 @@ class PDF(FPDF):
         self.cell(0, 8, self.title, ln=1, align="C")
         self.ln(2)
     
-# --- print heat as a block ---
-def print_heat(pdf, heat, x, y):
-    pdf.set_xy(x, y)
+    # --- print heat as a block ---
+    def print_heat(pdf, heat, x, y):
+        pdf.set_xy(x, y)
+    
+        pdf.set_font("Helvetica", "B", 10)
+        pdf.cell(0, 6, safe_text(f"Heat {heat['heat_number']}"), ln=1)
+    
+        pdf.set_font("Helvetica", "", 9)
+    
+        for lane in range(1, 9):
+            s = heat["lanes"].get(str(lane))
+            if not s:
+                continue
+    
+            name = s["name"][:20]
+    
+            pdf.set_x(x)
+            pdf.cell(5, self.line_height, str(lane), 0, 0, 'C')
+            pdf.cell(30, self.line_height, name, 0, 0, 'L')
+            pdf.cell(8, self.line_height, str(s['age']), 0, 0, 'C')
+            pdf.cell(20, self.line_height, s.get('team','')[:8], 0, 0, 'L')
+            pdf.cell(20, self.line_height, s['seed_time'], 0, 1, 'R')
+    
+        return pdf.get_y()
 
-    pdf.set_font("Helvetica", "B", 10)
-    pdf.cell(0, 6, safe_text(f"Heat {heat['heat_number']}"), ln=1)
-
-    pdf.set_font("Helvetica", "", 9)
-
-    for lane in range(1, 9):
-        s = heat["lanes"].get(str(lane))
-        if not s:
-            continue
-
-        name = s["name"][:20]
-
-        pdf.set_x(x)
-        pdf.cell(5, self.line_height, str(lane), 0, 0, 'C')
-        pdf.cell(30, self.line_height, name, 0, 0, 'L')
-        pdf.cell(8, self.line_height, str(s['age']), 0, 0, 'C')
-        pdf.cell(20, self.line_height, s.get('team','')[:8], 0, 0, 'L')
-        pdf.cell(20, self.line_height, s['seed_time'], 0, 1, 'R')
-
-    return pdf.get_y()
-
-def generate_pdf(meet_title, heat_sheet, favorites):
-    pdf = PDF()
-    pdf.title = meet_title
-
-    pdf.set_auto_page_break(True, margin=10)
-
-    # ---------------- FAVORITES PAGE ----------------
-    pdf.add_page()
-    pdf.set_font("Helvetica", "B", 14)
-    pdf.cell(0, 8, "Favorite Swimmers", ln=1)
-
-    index = build_index(heat_sheet, favorites)
-
-    pdf.set_font("Helvetica", "", 11)
-
-    for name, items in index.items():
-        pdf.ln(2)
-        pdf.set_font("Helvetica", "B", 12)
-        pdf.cell(0, 6, name, ln=1)
-
-        pdf.set_font("Helvetica", "", 10)
-        for it in items:
-            pdf.cell(0, 5, it, ln=1)
-
-    # ---------------- SUMMARY PAGE ----------------
-    pdf.add_page()
-    pdf.set_font("Helvetica", "B", 14)
-    pdf.cell(0, 8, "Meet Summary", ln=1)
-
-    pdf.set_font("Helvetica", "", 11)
-    pdf.cell(0, 6, f"Events: {len(heat_sheet)}", ln=1)
-    pdf.cell(0, 6, f"Favorites: {len(favorites)}", ln=1)
-
-    # ---------------- HEAT SHEETS ----------------
-    # for event in heat_sheet:
-    #     pdf.add_page()
-    #     pdf.set_font("Helvetica", "B", 11)
-    #     pdf.multi_cell(0, 6, safe_text(f"Event {event['number']}: {event['name']}"))
-
-    #     for heat in event["heats"]:
-    #         pdf.set_font("Helvetica", "B", 10)
-    #         pdf.set_x(pdf.l_margin)
-    #         pdf.cell(0, 6, safe_text(f"Heat {heat['heat_number']}"), align='L', ln=1)
-
-    #         pdf.set_font("Helvetica", "", 10)
-    #         for lane in range(1, 9):
-    #             s = heat["lanes"].get(str(lane))
-    #             if s:
-    #                 name = s["name"]
-    #                 if name in favorites:
-    #                     name = "* " + name
-
-    #                 # line = f"{lane} {name[:25]:25} {s['age']} {s.get('team','')} {s['seed_time']}"
-    #                 # pdf.cell(0, 5, safe_text(line), ln=1)
-
-    #                 pdf.cell(5, 5, str(lane), border=0, align='C')
-    #                 pdf.cell(40, 5, name[:25], border=0, align='L')
-    #                 pdf.cell(5, 5, str(s['age']), border=0, align='C')
-    #                 pdf.cell(10, 5, s.get('team', ''), border=0, align='L')
-    #                 pdf.cell(15, 5, s['seed_time'], border=0, align='R')
-    #                 pdf.ln()
-
-    for event in heat_sheet:
+    def generate_pdf(meet_title, heat_sheet, favorites):
+        pdf = PDF()
+        pdf.title = meet_title
+    
+        pdf.set_auto_page_break(True, margin=10)
+    
+        # ---------------- FAVORITES PAGE ----------------
         pdf.add_page()
-        # two-column page
-        page_width = pdf.w - 2 * pdf.l_margin
-        col_width = page_width / 2
+        pdf.set_font("Helvetica", "B", 14)
+        pdf.cell(0, 8, "Favorite Swimmers", ln=1)
     
-        pdf.set_font("Helvetica", "B", 11)
-        pdf.multi_cell(0, 6, safe_text(f"Event {event['number']}: {event['name']}"))
+        index = build_index(heat_sheet, favorites)
     
-        x_left = pdf.l_margin
-        x_right = pdf.l_margin + col_width
-        y_start = pdf.get_y()
+        pdf.set_font("Helvetica", "", 11)
     
-        col = 0
-        x = x_left
-        y = y_start
+        for name, items in index.items():
+            pdf.ln(2)
+            pdf.set_font("Helvetica", "B", 12)
+            pdf.cell(0, 6, name, ln=1)
     
-        for heat in event["heats"]:
-            # estimate height (important for page breaks)
-            estimated_height = 8 * self.line_height + 10
+            pdf.set_font("Helvetica", "", 10)
+            for it in items:
+                pdf.cell(0, 5, it, ln=1)
     
-            # page break check
-            if y + estimated_height > pdf.h - pdf.b_margin:
-                pdf.add_page()
-                y = pdf.get_y()
-                col = 0
-                x = x_left
+        # ---------------- SUMMARY PAGE ----------------
+        pdf.add_page()
+        pdf.set_font("Helvetica", "B", 14)
+        pdf.cell(0, 8, "Meet Summary", ln=1)
     
-            # switch column
-            if col == 1:
-                x = x_right
-            else:
-                x = x_left
+        pdf.set_font("Helvetica", "", 11)
+        pdf.cell(0, 6, f"Events: {len(heat_sheet)}", ln=1)
+        pdf.cell(0, 6, f"Favorites: {len(favorites)}", ln=1)
     
-            y = print_heat(pdf, heat, x, y)
+        # ---------------- HEAT SHEETS ----------------
+        for event in heat_sheet:
+            pdf.add_page()
+            # two-column page
+            page_width = pdf.w - 2 * pdf.l_margin
+            col_width = page_width / 2
+        
+            pdf.set_font("Helvetica", "B", 11)
+            pdf.multi_cell(0, 6, safe_text(f"Event {event['number']}: {event['name']}"))
+        
+            x_left = pdf.l_margin
+            x_right = pdf.l_margin + col_width
+            y_start = pdf.get_y()
+        
+            col = 0
+            x = x_left
+            y = y_start
+        
+            for heat in event["heats"]:
+                # estimate height (important for page breaks)
+                estimated_height = 8 * self.line_height + 10
+        
+                # page break check
+                if y + estimated_height > pdf.h - pdf.b_margin:
+                    pdf.add_page()
+                    y = pdf.get_y()
+                    col = 0
+                    x = x_left
+        
+                # switch column
+                if col == 1:
+                    x = x_right
+                else:
+                    x = x_left
+        
+                y = print_heat(pdf, heat, x, y)
+        
+                # move to next column or next row
+                if col == 0:
+                    col = 1
+                else:
+                    col = 0
+                    y += 8 * self.line_height + 5
     
-            # move to next column or next row
-            if col == 0:
-                col = 1
-            else:
-                col = 0
-                y += 8 * self.line_height + 5
+        return bytes(pdf.output())
 
-    return bytes(pdf.output())
-
-# ==========================================================
-# STREAMLIT UI
-# ==========================================================
-
-st.set_page_config(page_title="Heat Sheet Generator", layout="wide")
-st.title("🏊 Swim Meet Heat Sheet Generator")
-
-uploaded_file = st.file_uploader("Upload Psych Sheet PDF", type=["pdf"])
-
-if uploaded_file:
-
-    text = extract_text_from_pdf(uploaded_file)
-    meet_title = extract_meet_title(text)
-
-    events = parse_psych_sheet(text)
-
-    all_swimmers = sorted({
-        s["name"]
-        for e in events
-        for s in e["swimmers"]
-    })
-
-    st.subheader("Select Favorite Swimmers")
-    favorites = st.multiselect("Favorites", all_swimmers)
-
-    st.caption(f"Meet: {meet_title}")
-
-    heat_sheet = []
-    for e in events:
-        heat_sheet.append({
-            "number": e["number"],
-            "name": e["name"],
-            "heats": seed_event(e)
-        })
-
-    st.download_button(
-        "Download JSON",
-        json.dumps(heat_sheet, indent=2),
-        file_name="heat_sheet.json",
-        mime="application/json"
-    )
-
-    pdf_bytes = generate_pdf(meet_title, heat_sheet, favorites)
-
-    st.download_button(
-        "Download PDF",
-        pdf_bytes,
-        file_name="heat_sheet.pdf",
-        mime="application/pdf"
-    )
+        # ==========================================================
+        # STREAMLIT UI
+        # ==========================================================
+        
+        st.set_page_config(page_title="Heat Sheet Generator", layout="wide")
+        st.title("🏊 Swim Meet Heat Sheet Generator")
+        
+        uploaded_file = st.file_uploader("Upload Psych Sheet PDF", type=["pdf"])
+        
+        if uploaded_file:
+        
+            text = extract_text_from_pdf(uploaded_file)
+            meet_title = extract_meet_title(text)
+        
+            events = parse_psych_sheet(text)
+        
+            all_swimmers = sorted({
+                s["name"]
+                for e in events
+                for s in e["swimmers"]
+            })
+        
+            st.subheader("Select Favorite Swimmers")
+            favorites = st.multiselect("Favorites", all_swimmers)
+        
+            st.caption(f"Meet: {meet_title}")
+        
+            heat_sheet = []
+            for e in events:
+                heat_sheet.append({
+                    "number": e["number"],
+                    "name": e["name"],
+                    "heats": seed_event(e)
+                })
+        
+            st.download_button(
+                "Download JSON",
+                json.dumps(heat_sheet, indent=2),
+                file_name="heat_sheet.json",
+                mime="application/json"
+            )
+        
+            pdf_bytes = generate_pdf(meet_title, heat_sheet, favorites)
+        
+            st.download_button(
+                "Download PDF",
+                pdf_bytes,
+                file_name="heat_sheet.pdf",
+                mime="application/pdf"
+            )
