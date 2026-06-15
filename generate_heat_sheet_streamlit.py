@@ -318,12 +318,14 @@ def generate_pdf(meet_title, heat_sheet, favorites):
             h = pdf.print_heat(heat, x, y)
 
             # move to next column or next row
-            if col == 0:
-                col = 1
-            else:
-                col = 0
-                # y += 8 * pdf.line_height + 5
-                y += h + 5 # advance vertically ONLY after right column
+            # if col == 0:
+            #     col = 1
+            # else:
+            #     col = 0
+            #     # y += 8 * pdf.line_height + 5
+            #     y += h + 5 # advance vertically ONLY after right column
+
+            y += h + 5 # advance vertically ONLY after right column
 
     return bytes(pdf.output())
 
