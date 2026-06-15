@@ -246,6 +246,9 @@ class PDF(FPDF):
 
 
 def generate_pdf(meet_title, heat_sheet, favorites):
+    def __init__(self):
+        super().__init__()
+
     pdf = PDF()
     pdf.title = meet_title
 
