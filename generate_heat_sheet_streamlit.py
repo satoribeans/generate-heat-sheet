@@ -226,6 +226,8 @@ class PDF(FPDF):
     def print_heat(self, heat, x, y):
         self.set_xy(x, y)
 
+        start_y =y
+
         self.set_font("Helvetica", "B", 10)
         self.cell(0, 6, safe_text(f"Heat {heat['heat_number']}"), ln=1)
 
@@ -245,7 +247,7 @@ class PDF(FPDF):
             self.cell(20, self.line_height, s.get('team', '')[:8], 0, 0, 'L')
             self.cell(20, self.line_height, s['seed_time'], 0, 1, 'R')
 
-        return self.get_y()
+        return self.get_y() - start_y   # return height ONLY
 
 
 def generate_pdf(meet_title, heat_sheet, favorites):
@@ -297,7 +299,7 @@ def generate_pdf(meet_title, heat_sheet, favorites):
 
         col = 0
         x = x_left
-        y = y_start
+        y = pdf.get_y()
 
         for heat in event["heats"]:
             # estimate height (important for page breaks)
@@ -308,22 +310,20 @@ def generate_pdf(meet_title, heat_sheet, favorites):
                 pdf.add_page()
                 y = pdf.get_y()
                 col = 0
-                x = x_left
+            
+            # decide column
+            x = x_left if col == 0 else x_right
 
-            # switch column
-            if col == 1:
-                x = x_right
-            else:
-                x = x_left
-
-            y = pdf.print_heat(heat, x, y)
+            # print heat
+            h = pdf.print_heat(pdf, heat, x, y)
 
             # move to next column or next row
             if col == 0:
                 col = 1
             else:
                 col = 0
-                y += 8 * pdf.line_height + 5
+                # y += 8 * pdf.line_height + 5
+                y += h + 5 # advance vertically ONLY after right column
 
     return bytes(pdf.output())
 
