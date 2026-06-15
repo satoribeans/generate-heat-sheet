@@ -283,25 +283,22 @@ def generate_pdf(meet_title, heat_sheet, favorites):
     pdf.cell(0, 6, f"Events: {len(heat_sheet)}", ln=1)
     pdf.cell(0, 6, f"Favorites: {len(favorites)}", ln=1)
 
+    pdf.add_page()
+    # two-column page
+    page_width = pdf.w - 2 * pdf.l_margin
+    col_width = page_width / 2
+
+    col = 0
+    x_left = pdf.l_margin
+    x_right = pdf.l_margin + col_width
+    y_left = pdf.get_y()
+    y_right = pdf.get_y()
+    
     # ---------------- HEAT SHEETS ----------------
     for event in heat_sheet:
-        pdf.add_page()
-        # two-column page
-        page_width = pdf.w - 2 * pdf.l_margin
-        col_width = page_width / 2
-
         pdf.set_font("Helvetica", "B", 11)
         pdf.multi_cell(0, 6, safe_text(f"Event {event['number']}: {event['name']}"))
 
-        x_left = pdf.l_margin
-        x_right = pdf.l_margin + col_width
-        y_start = pdf.get_y()
-
-        col = 0
-        
-        y_left = pdf.get_y()
-        y_right = pdf.get_y()
-        
         for heat in event["heats"]:
             # estimate height (important for page breaks)
             estimated_height = 8 * pdf.line_height + 10
