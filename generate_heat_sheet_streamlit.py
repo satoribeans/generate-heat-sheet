@@ -1,10 +1,8 @@
-
 import streamlit as st
 import pypdf
 import re
 import json
 from fpdf import FPDF
-from io import BytesIO
 
 # ==========================================================
 # HELPERS
@@ -17,9 +15,9 @@ def safe_text(text):
         "★": "*",
         "–": "-",
         "—": "-",
-        "’": "'",
-        "“": '"',
-        "”": '"'
+        "'": "'",
+        """: '"',
+        """: '"'
     }
 
     for k, v in replacements.items():
@@ -68,7 +66,7 @@ def extract_text_from_pdf(uploaded_file):
     reader = pypdf.PdfReader(uploaded_file)
     full_text = ""
 
-    for i, page in enumerate(reader.pages):
+    for page in reader.pages:
         text = page.extract_text()
         if text:
             full_text += text + "\n"
@@ -126,10 +124,11 @@ def parse_psych_sheet(text_content):
 
         mB = swimmer_re_B.match(line)
         if mB:
+            age_match = re.search(r'\d+', mB.group(3))
             swimmer_data = {
                 "team": mB.group(1),
                 "seed_time": mB.group(2),
-                "age": re.search(r'\d+', mB.group(3)).group(0) if re.search(r'\d+', mB.group(3)) else mB.group(3),
+                "age": age_match.group(0) if age_match else mB.group(3),
                 "name": mB.group(4).strip(),
                 "rank": int(mB.group(5))
             }
@@ -179,14 +178,14 @@ def seed_event(event, lanes=8):
         chunk = remaining[:lanes]
         remaining = remaining[lanes:]
 
-        lane_order = [4,5,3,6,2,7,1,8]
+        lane_order = [4, 5, 3, 6, 2, 7, 1, 8]
         assigned = {
             str(lane_order[i]): s
             for i, s in enumerate(chunk)
         }
 
         heats.append({
-            "heat_number": h+1,
+            "heat_number": h + 1,
             "lanes": assigned
         })
 
@@ -211,122 +210,123 @@ def build_index(heat_sheet, favorites):
 
 
 # ==========================================================
-# PDF GENERATION (OPTION A)
+# PDF GENERATION
 # ==========================================================
 
 class PDF(FPDF):
     def __init__(self):
         super().__init__()
         self.line_height = 5
-    
+
     def header(self):
         self.set_font("Helvetica", "B", 12)
         self.cell(0, 8, self.title, ln=1, align="C")
         self.ln(2)
-    
-    # --- print heat as a block ---
-    def print_heat(pdf, heat, x, y):
-        pdf.set_xy(x, y)
-    
-        pdf.set_font("Helvetica", "B", 10)
-        pdf.cell(0, 6, safe_text(f"Heat {heat['heat_number']}"), ln=1)
-    
-        pdf.set_font("Helvetica", "", 9)
-    
+
+    def print_heat(self, heat, x, y):
+        self.set_xy(x, y)
+
+        self.set_font("Helvetica", "B", 10)
+        self.cell(0, 6, safe_text(f"Heat {heat['heat_number']}"), ln=1)
+
+        self.set_font("Helvetica", "", 9)
+
         for lane in range(1, 9):
             s = heat["lanes"].get(str(lane))
             if not s:
                 continue
-    
-            name = s["name"][:20]
-    
-            pdf.set_x(x)
-            pdf.cell(5, self.line_height, str(lane), 0, 0, 'C')
-            pdf.cell(30, self.line_height, name, 0, 0, 'L')
-            pdf.cell(8, self.line_height, str(s['age']), 0, 0, 'C')
-            pdf.cell(20, self.line_height, s.get('team','')[:8], 0, 0, 'L')
-            pdf.cell(20, self.line_height, s['seed_time'], 0, 1, 'R')
-    
-        return pdf.get_y()
 
-    def generate_pdf(meet_title, heat_sheet, favorites):
-        pdf = PDF()
-        pdf.title = meet_title
-    
-        pdf.set_auto_page_break(True, margin=10)
-    
-        # ---------------- FAVORITES PAGE ----------------
+            name = s["name"][:20]
+
+            self.set_x(x)
+            self.cell(5, self.line_height, str(lane), 0, 0, 'C')
+            self.cell(30, self.line_height, name, 0, 0, 'L')
+            self.cell(8, self.line_height, str(s['age']), 0, 0, 'C')
+            self.cell(20, self.line_height, s.get('team', '')[:8], 0, 0, 'L')
+            self.cell(20, self.line_height, s['seed_time'], 0, 1, 'R')
+
+        return self.get_y()
+
+
+def generate_pdf(meet_title, heat_sheet, favorites):
+    pdf = PDF()
+    pdf.title = meet_title
+
+    pdf.set_auto_page_break(True, margin=10)
+
+    # ---------------- FAVORITES PAGE ----------------
+    pdf.add_page()
+    pdf.set_font("Helvetica", "B", 14)
+    pdf.cell(0, 8, "Favorite Swimmers", ln=1)
+
+    index = build_index(heat_sheet, favorites)
+
+    pdf.set_font("Helvetica", "", 11)
+
+    for name, items in index.items():
+        pdf.ln(2)
+        pdf.set_font("Helvetica", "B", 12)
+        pdf.cell(0, 6, name, ln=1)
+
+        pdf.set_font("Helvetica", "", 10)
+        for it in items:
+            pdf.cell(0, 5, it, ln=1)
+
+    # ---------------- SUMMARY PAGE ----------------
+    pdf.add_page()
+    pdf.set_font("Helvetica", "B", 14)
+    pdf.cell(0, 8, "Meet Summary", ln=1)
+
+    pdf.set_font("Helvetica", "", 11)
+    pdf.cell(0, 6, f"Events: {len(heat_sheet)}", ln=1)
+    pdf.cell(0, 6, f"Favorites: {len(favorites)}", ln=1)
+
+    # ---------------- HEAT SHEETS ----------------
+    for event in heat_sheet:
         pdf.add_page()
-        pdf.set_font("Helvetica", "B", 14)
-        pdf.cell(0, 8, "Favorite Swimmers", ln=1)
-    
-        index = build_index(heat_sheet, favorites)
-    
-        pdf.set_font("Helvetica", "", 11)
-    
-        for name, items in index.items():
-            pdf.ln(2)
-            pdf.set_font("Helvetica", "B", 12)
-            pdf.cell(0, 6, name, ln=1)
-    
-            pdf.set_font("Helvetica", "", 10)
-            for it in items:
-                pdf.cell(0, 5, it, ln=1)
-    
-        # ---------------- SUMMARY PAGE ----------------
-        pdf.add_page()
-        pdf.set_font("Helvetica", "B", 14)
-        pdf.cell(0, 8, "Meet Summary", ln=1)
-    
-        pdf.set_font("Helvetica", "", 11)
-        pdf.cell(0, 6, f"Events: {len(heat_sheet)}", ln=1)
-        pdf.cell(0, 6, f"Favorites: {len(favorites)}", ln=1)
-    
-        # ---------------- HEAT SHEETS ----------------
-        for event in heat_sheet:
-            pdf.add_page()
-            # two-column page
-            page_width = pdf.w - 2 * pdf.l_margin
-            col_width = page_width / 2
-        
-            pdf.set_font("Helvetica", "B", 11)
-            pdf.multi_cell(0, 6, safe_text(f"Event {event['number']}: {event['name']}"))
-        
-            x_left = pdf.l_margin
-            x_right = pdf.l_margin + col_width
-            y_start = pdf.get_y()
-        
-            col = 0
-            x = x_left
-            y = y_start
-        
-            for heat in event["heats"]:
-                # estimate height (important for page breaks)
-                estimated_height = 8 * self.line_height + 10
-        
-                # page break check
-                if y + estimated_height > pdf.h - pdf.b_margin:
-                    pdf.add_page()
-                    y = pdf.get_y()
-                    col = 0
-                    x = x_left
-        
-                # switch column
-                if col == 1:
-                    x = x_right
-                else:
-                    x = x_left
-        
-                y = print_heat(pdf, heat, x, y)
-        
-                # move to next column or next row
-                if col == 0:
-                    col = 1
-                else:
-                    col = 0
-                    y += 8 * self.line_height + 5
-    
-        return bytes(pdf.output())
+        # two-column page
+        page_width = pdf.w - 2 * pdf.l_margin
+        col_width = page_width / 2
+
+        pdf.set_font("Helvetica", "B", 11)
+        pdf.multi_cell(0, 6, safe_text(f"Event {event['number']}: {event['name']}"))
+
+        x_left = pdf.l_margin
+        x_right = pdf.l_margin + col_width
+        y_start = pdf.get_y()
+
+        col = 0
+        x = x_left
+        y = y_start
+
+        for heat in event["heats"]:
+            # estimate height (important for page breaks)
+            estimated_height = 8 * pdf.line_height + 10
+
+            # page break check
+            if y + estimated_height > pdf.h - pdf.b_margin:
+                pdf.add_page()
+                y = pdf.get_y()
+                col = 0
+                x = x_left
+
+            # switch column
+            if col == 1:
+                x = x_right
+            else:
+                x = x_left
+
+            y = pdf.print_heat(heat, x, y)
+
+            # move to next column or next row
+            if col == 0:
+                col = 1
+            else:
+                col = 0
+                y += 8 * pdf.line_height + 5
+
+    return bytes(pdf.output())
+
 
 # ==========================================================
 # STREAMLIT UI
