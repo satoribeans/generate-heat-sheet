@@ -295,7 +295,7 @@ def generate_pdf(meet_title, heat_sheet, favorites):
         # --- EVENT HEADER (full width) ---
         pdf.set_font("Helvetica", "B", 10)
         start_y = pdf.get_y()
-        pdf.multi_cell(0, 6, safe_text(f"Event {event['number']}: {event['name']}"))
+        pdf.cell(0, 6, safe_text(f"Event {event['number']}: {event['name']}"))
         header_h = pdf.get_y() - start_y
 
         # sync both columns after header
