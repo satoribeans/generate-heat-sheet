@@ -322,10 +322,10 @@ def generate_pdf(meet_title, heat_sheet, favorites):
                     y_right = pdf.get_y()
                     x = x_right
                 else:
+                    pdf.add_page()
                     col = 0;
                     y_left = pdf.get_y()
                     x = x_left
-                    pdf.add_page()
                     
                 y = pdf.get_y()
                 
