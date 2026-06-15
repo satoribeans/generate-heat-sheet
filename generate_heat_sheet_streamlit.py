@@ -310,8 +310,8 @@ def generate_pdf(meet_title, heat_sheet, favorites):
                 col += 1
                 # if already two columns, create a new page
                 if col == 2:
-                    col = 0
                     pdf.add_page()
+                    col = 0
 
                 y = pdf.get_y()
 
