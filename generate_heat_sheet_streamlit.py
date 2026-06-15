@@ -224,8 +224,8 @@ class PDF(FPDF):
     def __init__(self):
         super().__init__()
         self.line_height = 5
-        self.page_width = pdf.w - 2 * pdf.l_margin
-        self.col_width = page_width / 2
+        self.page_width = self.w - 2 * self.l_margin
+        self.col_width = self.page_width / 2
         
         line_height = 5
 
