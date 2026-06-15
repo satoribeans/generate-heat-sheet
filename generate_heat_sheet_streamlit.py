@@ -1,9 +1,42 @@
+
 import streamlit as st
 import pypdf
 import re
 import json
-import tempfile
-from weasyprint import HTML
+from fpdf import FPDF
+from io import BytesIO
+
+# ==========================================================
+# MEET TITLE EXTRACTION
+# ==========================================================
+
+def extract_meet_title(text):
+    lines = text.splitlines()
+
+    title_lines = []
+    for line in lines[:30]:  # only scan top of doc
+        line = line.strip()
+
+        if not line:
+            continue
+
+        # stop when we hit event list
+        if re.search(r'(?:Event\s+|#)\d+', line):
+            break
+
+        # skip page markers
+        if "PAGE" in line.upper():
+            continue
+
+        # likely header content
+        if len(line) > 5:
+            title_lines.append(line)
+
+    if title_lines:
+        return " - ".join(title_lines[:3])
+
+    return "Swim Meet Heat Sheet"
+
 
 # ==========================================================
 # PDF EXTRACTION
@@ -12,11 +45,12 @@ from weasyprint import HTML
 def extract_text_from_pdf(uploaded_file):
     reader = pypdf.PdfReader(uploaded_file)
     full_text = ""
+
     for i, page in enumerate(reader.pages):
-        full_text += f"--- PAGE {i + 1} ---\n"
         text = page.extract_text()
         if text:
             full_text += text + "\n"
+
     return full_text
 
 
@@ -40,24 +74,13 @@ def clean_line(line):
 def parse_psych_sheet(text_content):
     events = []
     current_event = None
+
     event_re = re.compile(r'(?:Event\s+|#)(\d+)\s+(.*)')
     seed_time_pattern = r'(NT|\d+:?\d*\.\d+)'
 
-    swimmer_re_A = re.compile(
-        r'^(\S+)\s+'
-        + seed_time_pattern
-        + r'\s+(\d+)\s+(.*?)\s+(\d+)$'
-    )
-    swimmer_re_B = re.compile(
-        r'^(\S+)\s+'
-        + seed_time_pattern
-        + r'\s*([MW]?\d+|Boys|Girls)\s*(.*?)\s*(\d+)$'
-    )
-    swimmer_re_C = re.compile(
-        r'^(\d+)\s+(.*?)\s+([MW]?\d+|Boys|Girls)\s+(\S+)\s+'
-        + seed_time_pattern
-        + r'$'
-    )
+    swimmer_re_A = re.compile(r'^(\S+)\s+' + seed_time_pattern + r'\s+(\d+)\s+(.*?)\s+(\d+)$')
+    swimmer_re_B = re.compile(r'^(\S+)\s+' + seed_time_pattern + r'\s*([MW]?\d+|Boys|Girls)\s*(.*?)\s*(\d+)$')
+    swimmer_re_C = re.compile(r'^(\d+)\s+(.*?)\s+([MW]?\d+|Boys|Girls)\s+(\S+)\s+' + seed_time_pattern + r'$')
 
     for line in text_content.splitlines():
         line = clean_line(line)
@@ -66,81 +89,53 @@ def parse_psych_sheet(text_content):
 
         event_match = event_re.search(line)
         if event_match:
-            event_num = event_match.group(1)
-            event_name = event_match.group(2).replace("...", "").strip()
-            is_continuation = "..." in line or "(" in line
-
-            if (
-                current_event
-                and current_event["number"] == event_num
-                and is_continuation
-            ):
-                continue
-
             current_event = {
-                "number": event_num,
-                "name": event_name,
+                "number": event_match.group(1),
+                "name": event_match.group(2).replace("...", "").strip(),
                 "swimmers": []
             }
-            enumber = int(event_num)
-
-            if ((250 < enumber < 301) or (enumber > 350)):
-                events.append(current_event)
+            events.append(current_event)
             continue
 
-        if current_event:
-            swimmer_data = None
-            match_B = swimmer_re_B.match(line)
+        if not current_event:
+            continue
 
-            if match_B:
-                team = match_B.group(1)
-                seed_time = match_B.group(2)
-                age_gender = match_B.group(3)
-                name = match_B.group(4).strip()
-                rank = int(match_B.group(5))
-                age_match = re.search(r'\d+', age_gender)
-                age = (
-                    age_match.group(0)
-                    if age_match
-                    else age_gender
-                )
+        swimmer_data = None
+
+        mB = swimmer_re_B.match(line)
+        if mB:
+            swimmer_data = {
+                "team": mB.group(1),
+                "seed_time": mB.group(2),
+                "age": re.search(r'\d+', mB.group(3)).group(0) if re.search(r'\d+', mB.group(3)) else mB.group(3),
+                "name": mB.group(4).strip(),
+                "rank": int(mB.group(5))
+            }
+
+        if not swimmer_data:
+            mC = swimmer_re_C.match(line)
+            if mC:
                 swimmer_data = {
-                    "name": name,
-                    "age": age,
-                    "team": team,
-                    "seed_time": seed_time,
-                    "rank": rank
+                    "rank": int(mC.group(1)),
+                    "name": mC.group(2).strip(),
+                    "age": mC.group(3),
+                    "team": mC.group(4),
+                    "seed_time": mC.group(5)
                 }
 
-            if not swimmer_data:
-                match_C = swimmer_re_C.match(line)
-                if match_C:
-                    swimmer_data = {
-                        "rank": int(match_C.group(1)),
-                        "name": match_C.group(2).strip(),
-                        "age": re.search(
-                            r'\d+',
-                            match_C.group(3)
-                        ).group(0)
-                        if re.search(r'\d+', match_C.group(3))
-                        else match_C.group(3),
-                        "team": match_C.group(4),
-                        "seed_time": match_C.group(5)
-                    }
+        if not swimmer_data:
+            mA = swimmer_re_A.match(line)
+            if mA:
+                swimmer_data = {
+                    "team": mA.group(1),
+                    "seed_time": mA.group(2),
+                    "age": mA.group(3),
+                    "name": mA.group(4).strip(),
+                    "rank": int(mA.group(5))
+                }
 
-            if not swimmer_data:
-                match_A = swimmer_re_A.match(line)
-                if match_A:
-                    swimmer_data = {
-                        "team": match_A.group(1),
-                        "seed_time": match_A.group(2),
-                        "age": match_A.group(3),
-                        "name": match_A.group(4).strip(),
-                        "rank": int(match_A.group(5))
-                    }
-
-            if swimmer_data:
-                current_event["swimmers"].append(swimmer_data)
+        if swimmer_data:
+            current_event["swimmers"].append(swimmer_data)
 
     return events
 
@@ -150,161 +145,144 @@ def parse_psych_sheet(text_content):
 # ==========================================================
 
 def seed_event(event, lanes=8):
-    swimmers = sorted(
-        event["swimmers"],
-        key=lambda x: x["rank"]
-    )
+    swimmers = sorted(event["swimmers"], key=lambda x: x["rank"])
     if not swimmers:
         return []
 
-    num_swimmers = len(swimmers)
-    num_heats = (num_swimmers + lanes - 1) // lanes
-    heats_swimmers = []
+    num_heats = (len(swimmers) + lanes - 1) // lanes
     remaining = swimmers[:]
+    heats = []
 
-    for h in range(num_heats, 0, -1):
-        count = lanes if h > 1 else len(remaining)
-        heats_swimmers.append(remaining[:count])
-        remaining = remaining[count:]
+    for h in range(num_heats):
+        chunk = remaining[:lanes]
+        remaining = remaining[lanes:]
 
-    heats_swimmers.reverse()
-    lane_order = [4, 5, 3, 6, 2, 7, 1, 8]
-    final_heats = []
-
-    for i, heat in enumerate(heats_swimmers):
-        heat.sort(key=lambda x: x["rank"])
+        lane_order = [4,5,3,6,2,7,1,8]
         assigned = {
-            str(lane_order[j]): swimmer
-            for j, swimmer
-            in enumerate(heat)
+            str(lane_order[i]): s
+            for i, s in enumerate(chunk)
         }
-        final_heats.append({
-            "heat_number": i + 1,
+
+        heats.append({
+            "heat_number": h+1,
             "lanes": assigned
         })
 
-    return final_heats
+    return heats
 
 
 # ==========================================================
-# HTML
+# FAVORITES INDEX
 # ==========================================================
 
-def generate_html_compact(data, favorite_swimmers):
-    html = """
-    <html>
-    <head>
-    <style>
+def build_index(heat_sheet, favorites):
+    index = {f: [] for f in favorites}
 
-    body {
-        font-family: Helvetica, Arial;
-        font-size: 10pt;
-    }
+    for event in heat_sheet:
+        for heat in event["heats"]:
+            for lane, s in heat["lanes"].items():
+                if s["name"] in favorites:
+                    index[s["name"]].append(
+                        f"Event {event['number']} Heat {heat['heat_number']} Lane {lane}"
+                    )
+    return index
 
-    table {
-        width:100%;
-        border-collapse:collapse;
-        margin-bottom:8px;
-    }
 
-    td {
-        padding:3px;
-        border-bottom:1px solid #ddd;
-    }
+# ==========================================================
+# PDF GENERATION (OPTION A)
+# ==========================================================
 
-    .favorite {
-        background:#ffffcc;
-        font-weight:bold;
-    }
+class PDF(FPDF):
+    def header(self):
+        self.set_font("Helvetica", "B", 12)
+        self.cell(0, 8, self.title, ln=1, align="C")
+        self.ln(2)
 
-    .event-header {
-        font-weight:bold;
-        margin-top:10px;
-    }
+def generate_pdf(meet_title, heat_sheet, favorites):
 
-    </style>
-    </head>
-    <body>
+    pdf = PDF()
+    pdf.title = meet_title
 
-    <h2>Heat Sheet</h2>
-    """
+    pdf.set_auto_page_break(True, margin=10)
 
-    for event in data:
-        html += (
-            f"<div class='event-header'>"
-            f"#{event['number']} "
-            f"{event['name']}</div>"
-        )
+    # ---------------- FAVORITES PAGE ----------------
+    pdf.add_page()
+    pdf.set_font("Helvetica", "B", 14)
+    pdf.cell(0, 8, "Favorite Swimmers", ln=1)
+
+    index = build_index(heat_sheet, favorites)
+
+    pdf.set_font("Helvetica", "", 11)
+
+    for name, items in index.items():
+        pdf.ln(2)
+        pdf.set_font("Helvetica", "B", 12)
+        pdf.cell(0, 6, name, ln=1)
+
+        pdf.set_font("Helvetica", "", 10)
+        for it in items:
+            pdf.cell(0, 5, it, ln=1)
+
+    # ---------------- SUMMARY PAGE ----------------
+    pdf.add_page()
+    pdf.set_font("Helvetica", "B", 14)
+    pdf.cell(0, 8, "Meet Summary", ln=1)
+
+    pdf.set_font("Helvetica", "", 11)
+    pdf.cell(0, 6, f"Events: {len(heat_sheet)}", ln=1)
+    pdf.cell(0, 6, f"Favorites: {len(favorites)}", ln=1)
+
+    # ---------------- HEAT SHEETS ----------------
+    for event in heat_sheet:
+        pdf.add_page()
+        pdf.set_font("Helvetica", "B", 12)
+        pdf.multi_cell(0, 6, f"Event {event['number']}: {event['name']}")
 
         for heat in event["heats"]:
-            html += (
-                f"<h4>"
-                f"Heat {heat['heat_number']}"
-                f"</h4>"
-            )
-            html += "<table>"
+            pdf.set_font("Helvetica", "B", 10)
+            pdf.cell(0, 6, f"Heat {heat['heat_number']}", ln=1)
+
+            pdf.set_font("Helvetica", "", 9)
 
             for lane in range(1, 9):
-                swimmer = heat["lanes"].get(str(lane))
-                if swimmer:
-                    css = (
-                        "favorite"
-                        if swimmer["name"]
-                        in favorite_swimmers
-                        else ""
-                    )
-                    html += f"""
-                    <tr class="{css}">
-                        <td>{lane}</td>
-                        <td>{swimmer["name"]}</td>
-                        <td>{swimmer["age"]}</td>
-                        <td>{swimmer["team"]}</td>
-                        <td>{swimmer["seed_time"]}</td>
-                    </tr>
-                    """
+                s = heat["lanes"].get(str(lane))
+                if s:
+                    name = s["name"]
+                    if name in favorites:
+                        name = "★ " + name
 
-            html += "</table>"
+                    line = f"{lane} {name[:25]:25} {s['age']} {s.get('team','')} {s['seed_time']}"
+                    pdf.cell(0, 5, line, ln=1)
 
-    html += "</body></html>"
-    return html
+    return bytes(pdf.output())
 
 
 # ==========================================================
 # STREAMLIT UI
 # ==========================================================
 
-st.set_page_config(
-    page_title="Heat Sheet Generator",
-    layout="wide"
-)
-
+st.set_page_config(page_title="Heat Sheet Generator", layout="wide")
 st.title("🏊 Swim Meet Heat Sheet Generator")
 
-uploaded_file = st.file_uploader(
-    "Upload Psych Sheet PDF",
-    type=["pdf"]
-)
+uploaded_file = st.file_uploader("Upload Psych Sheet PDF", type=["pdf"])
 
 if uploaded_file:
-    with st.spinner("Extracting PDF..."):
-        text = extract_text_from_pdf(uploaded_file)
+
+    text = extract_text_from_pdf(uploaded_file)
+    meet_title = extract_meet_title(text)
 
     events = parse_psych_sheet(text)
-    st.success(f"Found {len(events)} events")
 
     all_swimmers = sorted({
-        swimmer["name"]
-        for event in events
-        for swimmer in event["swimmers"]
+        s["name"]
+        for e in events
+        for s in e["swimmers"]
     })
 
-    favorites = st.multiselect(
-        "Favorite Swimmers",
-        all_swimmers
-    )
+    st.subheader("Select Favorite Swimmers")
+    favorites = st.multiselect("Favorites", all_swimmers)
 
-    with st.expander("Parsed Events"):
-        st.json(events)
+    st.caption(f"Meet: {meet_title}")
 
     heat_sheet = []
     for e in events:
@@ -314,34 +292,18 @@ if uploaded_file:
             "heats": seed_event(e)
         })
 
-    html = generate_html_compact(heat_sheet, favorites)
-
-    st.subheader("Heat Sheet Preview")
-    st.components.v1.html(
-        html,
-        height=800,
-        scrolling=True
-    )
-
     st.download_button(
-        "Download HTML",
-        html,
-        file_name="heat_sheet.html",
-        mime="text/html"
+        "Download JSON",
+        json.dumps(heat_sheet, indent=2),
+        file_name="heat_sheet.json",
+        mime="application/json"
     )
 
-    pdf_bytes = HTML(string=html).write_pdf()
+    pdf_bytes = generate_pdf(meet_title, heat_sheet, favorites)
 
     st.download_button(
         "Download PDF",
         pdf_bytes,
         file_name="heat_sheet.pdf",
         mime="application/pdf"
-    )
-
-    st.download_button(
-        "Download JSON",
-        json.dumps(heat_sheet, indent=2),
-        file_name="heat_sheet.json",
-        mime="application/json"
     )
