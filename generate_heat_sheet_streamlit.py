@@ -293,6 +293,7 @@ def generate_pdf(meet_title, heat_sheet, favorites):
     x_right = pdf.l_margin + col_width
     y_left = pdf.get_y()
     y_right = pdf.get_y()
+    top_y = pdf.get_y()
     
     # ---------------- HEAT SHEETS ----------------
     for event in heat_sheet:
@@ -311,26 +312,26 @@ def generate_pdf(meet_title, heat_sheet, favorites):
             if col == 0:
                 x = x_left
                 y = y_left
+
+                # if left column full -> switch to right
+                if y + estimated_height > pdf.h - pdf.b_margin:
+                    col = 1
+                    x = x_right
+                    y = y_right
+            
             else:
                 x = x_right
                 y = y_right
 
-            # page break check based on correct column y
-            if y + estimated_height > pdf.h - pdf.b_margin:
-                if col == 0:
-                    col = 1
-                    # y_right = pdf.get_y()
-                    x = x_right
-                else:
+                # page right column full -> new page
+                if y + estimated_height > pdf.h - pdf.b_margin:
                     pdf.add_page()
-                    col = 0;
                     y_left = pdf.get_y()
                     y_right = pdf.get_y()
+                    col = 0;
                     x = x_left
-                    
-                y = pdf.get_y()
-                
-
+                    y = y_left
+                        
             # render
             h = pdf.print_heat(heat, x, y)
 
