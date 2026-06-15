@@ -315,7 +315,7 @@ def generate_pdf(meet_title, heat_sheet, favorites):
             x = x_left if col == 0 else x_right
 
             # print heat
-            h = pdf.print_heat(pdf, heat, x, y)
+            h = pdf.print_heat(heat, x, y)
 
             # move to next column or next row
             if col == 0:
