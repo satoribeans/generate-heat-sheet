@@ -304,10 +304,8 @@ def generate_pdf(meet_title, heat_sheet, favorites):
         header_h = pdf.get_y() - start_y
 
         # sync both columns after header
-        # if col == 0:
-            y_left = pdf.get_y()
-        # else:
-            y_right = pdf.get_y()
+        y_left = pdf.get_y()
+        y_right = pdf.get_y()
 
         for heat in event["heats"]:
             # estimate height (important for page breaks)
