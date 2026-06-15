@@ -310,7 +310,7 @@ def generate_pdf(meet_title, heat_sheet, favorites):
             # page break check
             if y + estimated_height > pdf.h - pdf.b_margin:
                 page_column_count += 1
-                if page_column_count / 2 == 0:
+                if page_column_count / 2 == 1:
                     pdf.add_page()
                     page_column_count = 1
                 
