@@ -312,7 +312,7 @@ def generate_pdf(meet_title, heat_sheet, favorites):
                 col = 0
                 if x == x_left:
                     x = x_right
-                else
+                else:
                     x = x_left
             
             # decide column
