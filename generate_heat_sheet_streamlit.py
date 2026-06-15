@@ -228,7 +228,6 @@ class PDF(FPDF):
         self.cell(0, 6, safe_text(f"Heat {heat['heat_number']} of {event_total_heats}"), ln=1)
 
         self.set_font("Helvetica", "", 9)
-
         for lane in range(1, 9):
             s = heat["lanes"].get(str(lane))
             if not s:
@@ -238,9 +237,14 @@ class PDF(FPDF):
 
             self.set_x(x)
             self.cell(5, self.line_height, str(lane), 0, 0, 'C')
+                    
+            self.set_font("Helvetica", "", 10)
             self.cell(50, self.line_height, name, 0, 0, 'L')
+            
+            self.set_font("Helvetica", "", 9)
             self.cell(5, self.line_height, str(s['age']), 0, 0, 'C')
             self.cell(10, self.line_height, s.get('team', '')[:8], 0, 0, 'L')
+            self.set_font("Helvetica", "", 10)
             self.cell(20, self.line_height, s['seed_time'], 0, 1, 'R')
 
         return self.get_y() - start_y   # return height ONLY
