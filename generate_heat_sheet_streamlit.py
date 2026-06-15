@@ -36,7 +36,7 @@ def extract_meet_title(text):
     title_lines = []
     for line in lines[:30]:  # only scan top of doc
         line = line.strip()
-        line = re.sub(r"psyc", "heat", title_lines, flags=re.IGNORECASE)
+        # line = re.sub(r"psyc", "heat", title_lines, flags=re.IGNORECASE)
 
         if not line:
             continue
