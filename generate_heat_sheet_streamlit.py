@@ -291,9 +291,7 @@ def generate_pdf(meet_title, heat_sheet, favorites):
     top_y = pdf.get_y()
     
     # ---------------- HEAT SHEETS ----------------
-    num_heats = (num_swimmers + lanes - 1) // lanes
-
-    for event in range(heat_sheet:
+    for event in range(heat_sheet):
         # --- EVENT HEADER (full width) ---
         pdf.set_font("Helvetica", "B", 10)
         start_y = pdf.get_y()
