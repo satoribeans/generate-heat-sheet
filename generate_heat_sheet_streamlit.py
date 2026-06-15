@@ -295,12 +295,18 @@ def generate_pdf(meet_title, heat_sheet, favorites):
         # --- EVENT HEADER (full width) ---
         pdf.set_font("Helvetica", "B", 10)
         start_y = pdf.get_y()
+        if col == 0:
+            self.set_xy(x_left, y_left)
+        else:
+            self.set_xy(x_right, y_right)
+
         pdf.cell(0, 6, safe_text(f"Event {event['number']}: {event['name']}"))
-        header_h = pdf.get_y() - start_y
 
         # sync both columns after header
-        y_left = pdf.get_y()
-        y_right = pdf.get_y()
+        if col == 0:
+            y_left = pdf.get_y()
+        else:
+            y_right = pdf.get_y()
 
         for heat in event["heats"]:
             # estimate height (important for page breaks)
