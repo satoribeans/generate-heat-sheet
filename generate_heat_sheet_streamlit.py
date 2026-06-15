@@ -330,7 +330,7 @@ def generate_pdf(meet_title, heat_sheet, favorites):
     
         for heat in event["heats"]:
             # estimate height (important for page breaks)
-            estimated_height = 8 * self. + 10
+            estimated_height = 8 * self.line_height + 10
     
             # page break check
             if y + estimated_height > pdf.h - pdf.b_margin:
