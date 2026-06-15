@@ -215,13 +215,15 @@ def build_index(heat_sheet, favorites):
 # ==========================================================
 
 class PDF(FPDF):
+    def __init__(self):
+        super().__init__()
+        self.line_height = 5
+    
     def header(self):
         self.set_font("Helvetica", "B", 12)
         self.cell(0, 8, self.title, ln=1, align="C")
         self.ln(2)
     
-    line_height = 5
-
 # --- print heat as a block ---
 def print_heat(pdf, heat, x, y):
     pdf.set_xy(x, y)
@@ -239,11 +241,11 @@ def print_heat(pdf, heat, x, y):
         name = s["name"][:20]
 
         pdf.set_x(x)
-        pdf.cell(5, line_height, str(lane), 0, 0, 'C')
-        pdf.cell(30, line_height, name, 0, 0, 'L')
-        pdf.cell(8, line_height, str(s['age']), 0, 0, 'C')
-        pdf.cell(20, line_height, s.get('team','')[:8], 0, 0, 'L')
-        pdf.cell(20, line_height, s['seed_time'], 0, 1, 'R')
+        pdf.cell(5, self.line_height, str(lane), 0, 0, 'C')
+        pdf.cell(30, self.line_height, name, 0, 0, 'L')
+        pdf.cell(8, self.line_height, str(s['age']), 0, 0, 'C')
+        pdf.cell(20, self.line_height, s.get('team','')[:8], 0, 0, 'L')
+        pdf.cell(20, self.line_height, s['seed_time'], 0, 1, 'R')
 
     return pdf.get_y()
 
@@ -328,7 +330,7 @@ def generate_pdf(meet_title, heat_sheet, favorites):
     
         for heat in event["heats"]:
             # estimate height (important for page breaks)
-            estimated_height = 8 * line_height + 10
+            estimated_height = 8 * self. + 10
     
             # page break check
             if y + estimated_height > pdf.h - pdf.b_margin:
@@ -350,7 +352,7 @@ def generate_pdf(meet_title, heat_sheet, favorites):
                 col = 1
             else:
                 col = 0
-                y += 8 * line_height + 5
+                y += 8 * self. + 5
 
     return bytes(pdf.output())
 
