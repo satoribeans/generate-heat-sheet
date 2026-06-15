@@ -262,6 +262,7 @@ def generate_pdf(meet_title, heat_sheet, favorites):
 
         for heat in event["heats"]:
             pdf.set_font("Helvetica", "B", 10)
+            pdf.set_x(pdf.l_margin)
             pdf.cell(0, 6, safe_text(f"Heat {heat['heat_number']}"), align='L', ln=1)
 
             pdf.set_font("Helvetica", "", 10)
