@@ -273,7 +273,7 @@ def generate_pdf(meet_title, heat_sheet, favorites):
             pdf.cell(0, 5, it, ln=1)
 
     # ---------------- SUMMARY PAGE ----------------
-    pdf.add_page()
+    # pdf.add_page()
     pdf.set_font("Helvetica", "B", 14)
     pdf.cell(0, 8, "Meet Summary", ln=1)
 
@@ -285,7 +285,8 @@ def generate_pdf(meet_title, heat_sheet, favorites):
     # two-column page
     page_width = pdf.w - 2 * pdf.l_margin
     col_width = page_width / 2
-
+    
+    # ---------------- HEAT SHEETS ----------------
     col = 0
     x_left = pdf.l_margin
     x_right = pdf.l_margin + col_width
@@ -293,23 +294,20 @@ def generate_pdf(meet_title, heat_sheet, favorites):
     y_right = pdf.get_y()
     top_y = pdf.get_y()
     
-    # ---------------- HEAT SHEETS ----------------
     for event in heat_sheet:
         # --- EVENT HEADER (full width) ---
         pdf.set_font("Helvetica", "B", 10)
         start_y = pdf.get_y()
-        if col == 0:
-            self.set_xy(x_left, y_left)
-        else:
-            self.set_xy(x_right, y_right)
-
+        x = x_left if col == 0 else x_right
+        y = y_left if col == 0 else y_right        
+        pdf.set_xy(x, y)
         pdf.cell(0, 6, safe_text(f"Event {event['number']}: {event['name']}"))
 
         # sync both columns after header
         if col == 0:
-            y_left = pdf.get_y()
+            y_left += 7
         else:
-            y_right = pdf.get_y()
+            y_right += 7
 
         for heat in event["heats"]:
             # estimate height (important for page breaks)
