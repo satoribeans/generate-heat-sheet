@@ -257,15 +257,14 @@ def generate_pdf(meet_title, heat_sheet, favorites):
     # ---------------- HEAT SHEETS ----------------
     for event in heat_sheet:
         pdf.add_page()
-        pdf.set_font("Helvetica", "B", 12)
+        pdf.set_font("Helvetica", "B", 11)
         pdf.multi_cell(0, 6, safe_text(f"Event {event['number']}: {event['name']}"))
 
         for heat in event["heats"]:
             pdf.set_font("Helvetica", "B", 10)
-            pdf.cell(0, 6, safe_text(f"Heat {heat['heat_number']}"), ln=1)
+            pdf.cell(0, 6, safe_text(f"Heat {heat['heat_number']}"), align='L', ln=1)
 
-            pdf.set_font("Helvetica", "", 9)
-
+            pdf.set_font("Helvetica", "", 10)
             for lane in range(1, 9):
                 s = heat["lanes"].get(str(lane))
                 if s:
