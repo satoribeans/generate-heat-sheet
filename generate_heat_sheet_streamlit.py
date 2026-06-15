@@ -103,15 +103,7 @@ def parse_psych_sheet(text_content):
                 "swimmers": []
             }
 
-            enumber = int(event_num)
-
-            if (
-                (250 < enumber < 301)
-                or (enumber > 350)
-            ):
-                events.append(current_event)
-
-            continue
+            events.append(current_event)
 
         if current_event:
 
