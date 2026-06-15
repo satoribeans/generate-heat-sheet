@@ -298,38 +298,42 @@ def generate_pdf(meet_title, heat_sheet, favorites):
         y_start = pdf.get_y()
 
         col = 0
+        
+        y_left = pdf.get_y()
+        y_right = pdf.get_y()
+        
         x = x_left
-        y = pdf.get_y()
+        # y = pdf.get_y()
 
         for heat in event["heats"]:
             # estimate height (important for page breaks)
             estimated_height = 8 * pdf.line_height + 10
 
-            # page break check
-            if y + estimated_height > pdf.h - pdf.b_margin:
-                col += 1
-                # if already two columns, create a new page
-                if col == 2:
-                    pdf.add_page()
-                    col = 0
+            # pick correct column position
+            if col == 0:
+                x = x_left
+                y = y_left
+            else:
+                x = x_right
+                y = y_right
 
+            # page break check based on correct column y
+            if y + estimated_height > pdf.h - pdf.b_margin:
+                pdf.add_page()
+                y_left = pdf.get_y()
+                y_right = pdf.get_y()
                 y = pdf.get_y()
 
-            # decide column
-            x = x_left if col == 0 else x_right
-
-            # print heat
+            # render
             h = pdf.print_heat(heat, x, y)
 
-            # move to next column or next row
-            # if col == 0:
-            #     col = 1
-            # else:
-            #     col = 0
-            #     # y += 8 * pdf.line_height + 5
-            #     y += h + 5 # advance vertically ONLY after right column
-
-            y += h + 5 # advance vertically ONLY after right column
+            # update ONLY that column's Y
+            if col == 0:
+                y_left += h+5
+                col +1
+            else:
+                y_right += h +5
+                col = 0
 
     return bytes(pdf.output())
 
