@@ -298,10 +298,10 @@ def generate_pdf(meet_title, heat_sheet, favorites):
     for event in heat_sheet:
         pdf.set_font("Helvetica", "B", 10)
         pdf.multi_cell(0, 6, safe_text(f"Event {event['number']}: {event['name']}"))
-        # if col == 0:
-        #     y_left = pdf.get_y()
-        # else:
-        #     y_right = pdf.get_y()
+        if col == 0:
+            y_left = pdf.get_y()
+        else:
+            y_right = pdf.get_y()
 
         for heat in event["heats"]:
             # estimate height (important for page breaks)
@@ -317,10 +317,15 @@ def generate_pdf(meet_title, heat_sheet, favorites):
 
             # page break check based on correct column y
             if y + estimated_height > pdf.h - pdf.b_margin:
-                pdf.add_page()
+                if col == 0:
+                    col = 1
+                else:
+                    col = 0;
+                    pdf.add_page()
                 y_left = pdf.get_y()
                 y_right = pdf.get_y()
                 y = pdf.get_y()
+                
 
             # render
             h = pdf.print_heat(heat, x, y)
@@ -328,10 +333,8 @@ def generate_pdf(meet_title, heat_sheet, favorites):
             # update ONLY that column's Y
             if col == 0:
                 y_left += h+5
-                col = 1
             else:
                 y_right += h +5
-                col = 0
 
     return bytes(pdf.output())
 
