@@ -328,53 +328,53 @@ class PDF(FPDF):
     
         return bytes(pdf.output())
 
-        # ==========================================================
-        # STREAMLIT UI
-        # ==========================================================
-        
-        st.set_page_config(page_title="Heat Sheet Generator", layout="wide")
-        st.title("🏊 Swim Meet Heat Sheet Generator")
-        
-        uploaded_file = st.file_uploader("Upload Psych Sheet PDF", type=["pdf"])
-        
-        if uploaded_file:
-        
-            text = extract_text_from_pdf(uploaded_file)
-            meet_title = extract_meet_title(text)
-        
-            events = parse_psych_sheet(text)
-        
-            all_swimmers = sorted({
-                s["name"]
-                for e in events
-                for s in e["swimmers"]
-            })
-        
-            st.subheader("Select Favorite Swimmers")
-            favorites = st.multiselect("Favorites", all_swimmers)
-        
-            st.caption(f"Meet: {meet_title}")
-        
-            heat_sheet = []
-            for e in events:
-                heat_sheet.append({
-                    "number": e["number"],
-                    "name": e["name"],
-                    "heats": seed_event(e)
-                })
-        
-            st.download_button(
-                "Download JSON",
-                json.dumps(heat_sheet, indent=2),
-                file_name="heat_sheet.json",
-                mime="application/json"
-            )
-        
-            pdf_bytes = generate_pdf(meet_title, heat_sheet, favorites)
-        
-            st.download_button(
-                "Download PDF",
-                pdf_bytes,
-                file_name="heat_sheet.pdf",
-                mime="application/pdf"
-            )
+# ==========================================================
+# STREAMLIT UI
+# ==========================================================
+
+st.set_page_config(page_title="Heat Sheet Generator", layout="wide")
+st.title("🏊 Swim Meet Heat Sheet Generator")
+
+uploaded_file = st.file_uploader("Upload Psych Sheet PDF", type=["pdf"])
+
+if uploaded_file:
+
+    text = extract_text_from_pdf(uploaded_file)
+    meet_title = extract_meet_title(text)
+
+    events = parse_psych_sheet(text)
+
+    all_swimmers = sorted({
+        s["name"]
+        for e in events
+        for s in e["swimmers"]
+    })
+
+    st.subheader("Select Favorite Swimmers")
+    favorites = st.multiselect("Favorites", all_swimmers)
+
+    st.caption(f"Meet: {meet_title}")
+
+    heat_sheet = []
+    for e in events:
+        heat_sheet.append({
+            "number": e["number"],
+            "name": e["name"],
+            "heats": seed_event(e)
+        })
+
+    st.download_button(
+        "Download JSON",
+        json.dumps(heat_sheet, indent=2),
+        file_name="heat_sheet.json",
+        mime="application/json"
+    )
+
+    pdf_bytes = generate_pdf(meet_title, heat_sheet, favorites)
+
+    st.download_button(
+        "Download PDF",
+        pdf_bytes,
+        file_name="heat_sheet.pdf",
+        mime="application/pdf"
+    )
