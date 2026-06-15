@@ -307,7 +307,7 @@ def generate_pdf(meet_title, heat_sheet, favorites):
         y_left = pdf.get_y()
         y_right = pdf.get_y()
 
-        for heat in event["heats"]:
+        for heat in reversed(event["heats"]):
             # estimate height (important for page breaks)
             estimated_height = 8 * pdf.line_height + 10
 
