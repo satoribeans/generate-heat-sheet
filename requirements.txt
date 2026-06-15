@@ -1,0 +1,3 @@
+streamlit>=1.45
+pypdf>=5.0
+weasyprint>=65.0
