@@ -244,8 +244,8 @@ class PDF(FPDF):
             self.cell(5, self.line_height, str(lane), 0, 0, 'C')
             self.cell(50, self.line_height, name, 0, 0, 'L')
             self.cell(5, self.line_height, str(s['age']), 0, 0, 'C')
-            self.cell(15, self.line_height, s.get('team', '')[:8], 0, 0, 'L')
-            self.cell(25, self.line_height, s['seed_time'], 0, 1, 'R')
+            self.cell(10, self.line_height, s.get('team', '')[:8], 0, 0, 'L')
+            self.cell(20, self.line_height, s['seed_time'], 0, 1, 'R')
 
         return self.get_y() - start_y   # return height ONLY
 
