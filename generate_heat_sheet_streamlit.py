@@ -7,6 +7,28 @@ from fpdf import FPDF
 from io import BytesIO
 
 # ==========================================================
+# HELPERS
+# ==========================================================
+def safe_text(text):
+    if not text:
+        return ""
+
+    replacements = {
+        "★": "*",
+        "–": "-",
+        "—": "-",
+        "’": "'",
+        "“": '"',
+        "”": '"'
+    }
+
+    for k, v in replacements.items():
+        text = text.replace(k, v)
+
+    # remove any remaining non-latin1 chars
+    return text.encode("latin-1", "ignore").decode("latin-1")
+
+# ==========================================================
 # MEET TITLE EXTRACTION
 # ==========================================================
 
@@ -236,11 +258,11 @@ def generate_pdf(meet_title, heat_sheet, favorites):
     for event in heat_sheet:
         pdf.add_page()
         pdf.set_font("Helvetica", "B", 12)
-        pdf.multi_cell(0, 6, f"Event {event['number']}: {event['name']}")
+        pdf.multi_cell(0, 6, safe_text(f"Event {event['number']}: {event['name']}"))
 
         for heat in event["heats"]:
             pdf.set_font("Helvetica", "B", 10)
-            pdf.cell(0, 6, f"Heat {heat['heat_number']}", ln=1)
+            pdf.cell(0, 6, safe_text(f"Heat {heat['heat_number']}"), ln=1)
 
             pdf.set_font("Helvetica", "", 9)
 
@@ -252,7 +274,7 @@ def generate_pdf(meet_title, heat_sheet, favorites):
                         name = "★ " + name
 
                     line = f"{lane} {name[:25]:25} {s['age']} {s.get('team','')} {s['seed_time']}"
-                    pdf.cell(0, 5, line, ln=1)
+                    pdf.cell(0, 5, safe_text(line), ln=1)
 
     return bytes(pdf.output())
 
