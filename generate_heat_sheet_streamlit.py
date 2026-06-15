@@ -166,31 +166,26 @@ def parse_psych_sheet(text_content):
 # ==========================================================
 
 def seed_event(event, lanes=8):
-    swimmers = sorted(event["swimmers"], key=lambda x: x["rank"])
-    if not swimmers:
-        return []
-
-    num_heats = (len(swimmers) + lanes - 1) // lanes
+    swimmers = sorted(event['swimmers'], key=lambda x: x['rank'])
+    if not swimmers: return []
+    num_swimmers = len(swimmers)
+    num_heats = (num_swimmers + lanes - 1) // lanes
+    heats_swimmers = []
     remaining = swimmers[:]
-    heats = []
-
-    for h in range(num_heats):
-        chunk = remaining[:lanes]
-        remaining = remaining[lanes:]
-
-        lane_order = [4, 5, 3, 6, 2, 7, 1, 8]
-        assigned = {
-            str(lane_order[i]): s
-            for i, s in enumerate(chunk)
-        }
-
-        heats.append({
-            "heat_number": h + 1,
-            "lanes": assigned
-        })
-
-    return heats
-
+    for h in range(num_heats, 0, -1):
+        count = lanes if h > 1 else len(remaining)
+        if h > 1 and len(remaining) - count < 1 and len(remaining) > 1:
+            count = len(remaining) - 1
+        heats_swimmers.append(remaining[:count])
+        remaining = remaining[count:]
+    heats_swimmers.reverse()
+    lane_order = [4, 5, 3, 6, 2, 7, 1, 8] if lanes == 8 else [3, 4, 2, 5, 1, 6]
+    final_heats = []
+    for i, h_list in enumerate(heats_swimmers):
+        h_list.sort(key=lambda x: x['rank'])
+        assigned = {str(lane_order[j]): s for j, s in enumerate(h_list) if j < len(lane_order)}
+        final_heats.append({'heat_number': i + 1, 'lanes': assigned})
+    return final_heats
 
 # ==========================================================
 # FAVORITES INDEX
@@ -296,7 +291,9 @@ def generate_pdf(meet_title, heat_sheet, favorites):
     top_y = pdf.get_y()
     
     # ---------------- HEAT SHEETS ----------------
-    for event in heat_sheet:
+    num_heats = (num_swimmers + lanes - 1) // lanes
+
+    for event in range(heat_sheet:
         # --- EVENT HEADER (full width) ---
         pdf.set_font("Helvetica", "B", 10)
         start_y = pdf.get_y()
