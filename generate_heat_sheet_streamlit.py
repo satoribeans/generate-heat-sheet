@@ -215,19 +215,14 @@ def build_index(heat_sheet, favorites):
 # ==========================================================
 
 class PDF(FPDF):
+    def __init__(self):
+        super().__init__()
+        self.line_height = 5
+        
     def header(self):
         self.set_font("Helvetica", "B", 12)
         self.cell(0, 8, self.title, ln=1, align="C")
         self.ln(2)
-
-    # --- define page geometry ---
-    def __init__(self):
-        super().__init__()
-        self.line_height = 5
-        self.page_width = self.w - 2 * self.l_margin
-        self.col_width = self.page_width / 2
-        
-        line_height = 5
 
 # --- print heat as a block ---
 def print_heat(pdf, heat, x, y):
@@ -318,6 +313,10 @@ def generate_pdf(meet_title, heat_sheet, favorites):
 
     for event in heat_sheet:
         pdf.add_page()
+        # two-column page
+        page_width = pdf.w - 2 * pdf.l_margin
+        col_width = page_width / 2
+    
         pdf.set_font("Helvetica", "B", 11)
         pdf.multi_cell(0, 6, safe_text(f"Event {event['number']}: {event['name']}"))
     
