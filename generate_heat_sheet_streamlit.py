@@ -310,7 +310,7 @@ def generate_pdf(meet_title, heat_sheet, favorites):
                 pdf.add_page()
                 y = pdf.get_y()
                 col = 0
-                if x = x_left:
+                if x == x_left:
                     x = x_right
                 else
                     x = x_left
