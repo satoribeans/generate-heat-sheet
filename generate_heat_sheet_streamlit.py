@@ -271,7 +271,7 @@ def generate_pdf(meet_title, heat_sheet, favorites):
                 if s:
                     name = s["name"]
                     if name in favorites:
-                        name = "★ " + name
+                        name = "* " + name
 
                     line = f"{lane} {name[:25]:25} {s['age']} {s.get('team','')} {s['seed_time']}"
                     pdf.cell(0, 5, safe_text(line), ln=1)
