@@ -321,9 +321,9 @@ def generate_pdf(meet_title, heat_sheet, favorites):
 
         # sync both columns after header
         if col == 0:
-            y_left += 0
+            y_left += 5
         else:
-            y_right += 0
+            y_right += 5
 
         event_total_heats = len(event["heats"])
         for heat in event["heats"]:
