@@ -5,7 +5,26 @@ import json
 from fpdf import FPDF
 
 # ==========================================================
-# HELPERS
+# UI CONFIG
+# ==========================================================
+def get_ui_options():
+    heat_order = st.selectbox(
+        "Heat Seeding Order (400m+ events)",
+        ["fast_to_slow", "slow_to_fast", "circle_seed"],
+        index=0
+    )
+
+    heat_size = st.number_input(
+        "Heat Size (lanes)",
+        min_value=4,
+        max_value=10,
+        value=8
+    )
+
+    return heat_order, heat_size
+
+# ==========================================================
+# UTILS
 # ==========================================================
 def safe_text(text):
     if not text:
@@ -26,8 +45,6 @@ def safe_text(text):
     # remove any remaining non-latin1 chars
     return text.encode("latin-1", "ignore").decode("latin-1")
 
-import math
-
 def time_to_seconds(t):
     if not t or t == "NT":
         return 9999
@@ -39,16 +56,20 @@ def time_to_seconds(t):
         return float(t)
     except:
         return 9999
+
+def event_is_long_distance(event):
+    name = event["name"].lower()
+    return any(x in name for x in ["400", "500", "800", "1500"])
         
 # ==========================================================
-# MEET TITLE EXTRACTION
+# TEXT PROCESSING
 # ==========================================================
 
 def extract_meet_title(text):
     lines = text.splitlines()
-
     title_lines = []
-    for line in lines[:30]:  # only scan top of doc
+
+    for line in lines[:30]:
         line = line.strip()
         line = re.sub(r"\bpsych\s+sheet\b", "Heat Sheet", line, flags=re.IGNORECASE)
         line = re.sub(r"\bpsyc\s+sheet\b", "Heat Sheet", line, flags=re.IGNORECASE)
@@ -56,39 +77,25 @@ def extract_meet_title(text):
         if not line:
             continue
 
-        # stop when we hit event list
         if re.search(r'(?:Event\s+|#)\d+', line):
             break
 
-        # skip page markers
         if "PAGE" in line.upper():
             continue
 
-        # likely header content
-        if len(line) > 5:
-            title_lines.append(line)
+        title_lines.append(line)
 
-    if title_lines:
-        return " - ".join(title_lines[:3])
-
-    return "Swim Meet Heat Sheet"
-
+    return " - ".join(title_lines[:3]) if title_lines else "Swim Meet Heat Sheet"
 
 # ==========================================================
-# PDF EXTRACTION
+# PDF TEXT EXTRACTION
 # ==========================================================
-
-def extract_text_from_pdf(uploaded_file):
-    reader = pypdf.PdfReader(uploaded_file)
-    full_text = ""
-
-    for page in reader.pages:
-        text = page.extract_text()
-        if text:
-            full_text += text + "\n"
-
-    return full_text
-
+def extract_text_from_pdf(file):
+    reader = pypdf.PdfReader(file)
+    return "\n".join(
+        page.extract_text() or ""
+        for page in reader.pages
+    )
 
 # ==========================================================
 # CLEANUP
@@ -106,7 +113,6 @@ def clean_line(line):
 # ==========================================================
 # PARSER
 # ==========================================================
-
 def parse_psych_sheet(text_content):
     events = []
     current_event = None
@@ -122,186 +128,120 @@ def parse_psych_sheet(text_content):
 
     current_gender = None
 
-    # =====================
-    # FIRST PASS: PARSE RAW
-    # =====================
     for line in text_content.splitlines():
         line = clean_line(line)
         if not line:
             continue
 
-        # ---------
-        # Event
-        # ---------
-        event_match = event_re.search(line)
-        if event_match:
-            event_num = event_match.group(1)
-            event_name = event_match.group(2).replace("...", "").strip()
+        # EVENT
+        m = event_re.search(line)
+        if m:
+            num, name = m.group(1), m.group(2).replace("...", "").strip()
 
-            # page break duplicate
-            if (
-                current_event
-                and current_event["number"] == event_num
-                and len(current_event["swimmers"]) > 0
-            ):
+            if current_event and current_event["number"] == num:
                 continue
 
             current_gender = None
 
             current_event = {
-                "number": event_num,
-                "name": event_name,
+                "number": num,
+                "name": name,
                 "swimmers": []
             }
-
             events.append(current_event)
             continue
 
-        # -------------------------
-        # Gender section header
-        # -------------------------
-        gender_match = gender_header_re.match(line)
-        if gender_match:
-            current_gender = gender_match.group(1)[0].upper()  # W or M
+        # GENDER HEADER
+        gm = gender_header_re.match(line)
+        if gm:
+            current_gender = gm.group(1)[0].upper()
             continue
 
-        # -------------------------
-        # Must be inside event
-        # -------------------------
         if not current_event:
             continue
 
-        swimmer_data = None
+        swimmer = None
 
-        # Format B
-        mB = swimmer_re_B.match(line)
-        if mB:
-            age_match = re.search(r'\d+', mB.group(3))
+        for regex in (swimmer_re_B, swimmer_re_C, swimmer_re_A):
+            match = regex.match(line)
+            if match:
+                if regex == swimmer_re_B:
+                    swimmer = {
+                        "team": match.group(1),
+                        "seed_time": match.group(2),
+                        "age": match.group(3),
+                        "name": match.group(4).strip(),
+                        "rank": int(match.group(5))
+                    }
+                elif regex == swimmer_re_C:
+                    swimmer = {
+                        "rank": int(match.group(1)),
+                        "name": match.group(2).strip(),
+                        "age": match.group(3),
+                        "team": match.group(4),
+                        "seed_time": match.group(5)
+                    }
+                else:
+                    swimmer = {
+                        "team": match.group(1),
+                        "seed_time": match.group(2),
+                        "age": match.group(3),
+                        "name": match.group(4).strip(),
+                        "rank": int(match.group(5))
+                    }
+                break
 
-            swimmer_data = {
-                "team": mB.group(1),
-                "seed_time": mB.group(2),
-                "age": mB.group(3),
-                "name": mB.group(4).strip(),
-                "rank": int(mB.group(5))
-            }
+        if swimmer:
+            swimmer["gender"] = current_gender
+            current_event["swimmers"].append(swimmer)
 
-        # Format C
-        if not swimmer_data:
-            mC = swimmer_re_C.match(line)
-            if mC:
-                swimmer_data = {
-                    "rank": int(mC.group(1)),
-                    "name": mC.group(2).strip(),
-                    "age": mC.group(3),
-                    "team": mC.group(4),
-                    "seed_time": mC.group(5)
-                }
-
-        # Format A
-        if not swimmer_data:
-            mA = swimmer_re_A.match(line)
-            if mA:
-                swimmer_data = {
-                    "team": mA.group(1),
-                    "seed_time": mA.group(2),
-                    "age": mA.group(3),
-                    "name": mA.group(4).strip(),
-                    "rank": int(mA.group(5))
-                }
-
-        # -------------------------
-        # Attach swimmer
-        # -------------------------
-        if swimmer_data:
-            if current_gender:
-                swimmer_data["gender"] = current_gender
-
-            current_event["swimmers"].append(swimmer_data)
-
-    # ==========================
-    # SECOND PASS: SPLIT MIXED
-    # ==========================
-    final_events = []
-    HEAT_SIZE = 8   # adjust if needed
-
-    for event in events:
-        # -------------------------
-        # NON-MIXED EVENTS
-        # -------------------------
-        if "mixed" not in event["name"].lower():
-            final_events.append(event)
-            continue
-
-        # -------------------------
-        # COMBINE ALL SWIMMERS
-        # -------------------------
-        girls, boys = [], [] # used for seperating boys and girls
-        swimmers = event["swimmers"]
-
-        # assign gender (optional but useful)
-        for s in swimmers:
-            if "gender" not in s:
-                age = str(s.get("age", "")).upper()
-                s["gender"] = "W" if age.startswith("W") else "M"
-                
-        # -------------------------
-        # SORT BY SEED TIME
-        # -------------------------
-        swimmers_sorted = sorted(swimmers, key=lambda x: time_to_seconds(x.get("seed_time")))
-
-        # -------------------------
-        # REBUILD HEATS
-        # -------------------------
-        heat_num = 1
-        new_swimmers = []
-    
-        for i, s in enumerate(swimmers_sorted):
-            s = dict(s)
-            s["heat"] = heat_num
-            new_swimmers.append(s)
-    
-            if (i + 1) % HEAT_SIZE == 0:
-                heat_num += 1
-    
-        # -------------------------
-        # RETURN AS SINGLE EVENT
-        # -------------------------
-        final_events.append({
-            "number": event["number"],
-            "name": event["name"] + " - Mixed (Combined Heats)",
-            "swimmers": new_swimmers
-        })
-
-    return final_events
-
+    return events
 
 # ==========================================================
 # SEEDING
 # ==========================================================
+def seed_swimmers(event, heat_size, order):
+    swimmers = event["swimmers"]
+    swimmers_sorted = sorted(swimmers, key=lambda x: time_to_seconds(x.get("seed_time")))
 
-def seed_event(event, lanes=8):
-    swimmers = sorted(event['swimmers'], key=lambda x: x['rank'])
-    if not swimmers: return []
-    num_swimmers = len(swimmers)
-    num_heats = (num_swimmers + lanes - 1) // lanes
-    heats_swimmers = []
-    remaining = swimmers[:]
-    for h in range(num_heats, 0, -1):
-        count = lanes if h > 1 else len(remaining)
-        if h > 1 and len(remaining) - count < 1 and len(remaining) > 1:
-            count = len(remaining) - 1
-        heats_swimmers.append(remaining[:count])
-        remaining = remaining[count:]
-    heats_swimmers.reverse()
-    lane_order = [4, 5, 3, 6, 2, 7, 1, 8] if lanes == 8 else [3, 4, 2, 5, 1, 6]
-    final_heats = []
-    for i, h_list in enumerate(heats_swimmers):
-        h_list.sort(key=lambda x: x['rank'])
-        assigned = {str(lane_order[j]): s for j, s in enumerate(h_list) if j < len(lane_order)}
-        final_heats.append({'heat_number': i + 1, 'lanes': assigned})
-    return final_heats
+    if order == "slow_to_fast":
+        swimmers_sorted.reverse()
 
+    heat_num = 1
+    result = []
+
+    for i, s in enumerate(swimmers_sorted):
+        s = dict(s)
+        s["heat"] = heat_num
+        result.append(s)
+
+        if (i + 1) % heat_size == 0:
+            heat_num += 1
+
+    return result
+
+# ==========================================================
+# BUILD HEAT SHEET
+# ==========================================================
+def build_heat_sheet(events, heat_size, order):
+
+    heat_sheet = []
+
+    for e in events:
+
+        swimmers = e["swimmers"]
+
+        if "mixed" in e["name"].lower() or event_is_long_distance(e):
+            swimmers = seed_swimmers(e, heat_size, order)
+
+        heat_sheet.append({
+            "number": e["number"],
+            "name": e["name"],
+            "heats": seed_event({"swimmers": swimmers})
+        })
+
+    return heat_sheet
+    
 # ==========================================================
 # FAVORITES INDEX
 # ==========================================================
@@ -538,6 +478,8 @@ def generate_html_preview(meet_title, heat_sheet, favorites):
 st.set_page_config(page_title="Heat Sheet Generator", layout="wide")
 st.title("🏊 Swim Meet Heat Sheet Generator")
 
+heat_order, heat_size = get_ui_options()
+
 uploaded_file = st.file_uploader("Upload Psych Sheet PDF", type=["pdf"])
 
 if uploaded_file:
@@ -547,61 +489,21 @@ if uploaded_file:
 
     events = parse_psych_sheet(text)
 
-    all_swimmers = sorted({
-        s["name"]
-        for e in events
-        for s in e["swimmers"]
-    })
+    all_swimmers = sorted({s["name"] for e in events for s in e["swimmers"]})
 
-    st.subheader("Select Favorite Swimmers")
     favorites = st.multiselect("Favorites", all_swimmers)
 
-    st.caption(f"Meet: {meet_title}")
+    heat_sheet = build_heat_sheet(events, heat_size, heat_order)
 
-    heat_sheet = []
-    for e in events:
-        heat_sheet.append({
-            "number": e["number"],
-            "name": e["name"],
-            "heats": seed_event(e)
-        })
+    html = generate_html_preview(meet_title, heat_sheet, favorites)
 
-    # st.download_button(
-    #     "Download JSON",
-    #     json.dumps(heat_sheet, indent=2),
-    #     file_name="heat_sheet.json",
-    #     mime="application/json"
-    # )
-
-    # ── HTML PREVIEW ──────────────────────────────────────────
-    html_content = generate_html_preview(meet_title, heat_sheet, favorites)
-
-    with st.expander("👁 Preview Heat Sheet", expanded=True):
-        st.components.v1.html(html_content, height=600, scrolling=True)
+    st.components.v1.html(html, height=600, scrolling=True)
 
     col1, col2 = st.columns(2)
 
     with col1:
-        st.download_button(
-            "⬇ Download HTML",
-            html_content,
-            file_name="heat_sheet_preview.html",
-            mime="text/html",
-        )
+        st.download_button("Download HTML", html, "heat.html")
+
     with col2:
         pdf_bytes = generate_pdf(meet_title, heat_sheet, set(favorites))
-        st.download_button(
-            "⬇ Download PDF",
-            pdf_bytes,
-            file_name="heat_sheet.pdf",
-            mime="application/pdf",
-        )
-        
-    # pdf_bytes = generate_pdf(meet_title, heat_sheet, favorites)
-
-    # st.download_button(
-    #     "Download PDF",
-    #     pdf_bytes,
-    #     file_name="heat_sheet.pdf",
-    #     mime="application/pdf"
-    # )
+        st.download_button("Download PDF", pdf_bytes, "heat.pdf")
