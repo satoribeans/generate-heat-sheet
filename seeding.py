@@ -28,15 +28,10 @@ def build_heat_sheet(events, heat_size, order, is_long_event):
     heat_sheet = []
 
     for e in events:
-        swimmers = e["swimmers"]
-
-        if "mixed" in e["name"].lower() or is_long_event(e["name"]):
-            swimmers = seed_swimmers(swimmers, heat_size, order)
-
         heat_sheet.append({
             "number": e["number"],
             "name": e["name"],
-            "swimmers": swimmers
+            "heats": seed_event(e, lanes=heat_size)
         })
 
     return heat_sheet
