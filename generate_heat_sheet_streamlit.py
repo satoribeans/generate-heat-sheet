@@ -1,12 +1,17 @@
 import streamlit as st
+import pypdf
+
 from parser import parse_psych_sheet
 from seeding import build_heat_sheet
 from pdf_export import generate_pdf
 from html_export import generate_html_preview
-from utils import is_long_event
-import pypdf
+from utils import is_long_event, extract_meet_title
 
-st.set_page_config(page_title="Heat Sheet Generator", layout="wide")
+st.set_page_config(
+    page_title="Heat Sheet Generator",
+    layout="wide"
+)
+
 st.title("🏊 Swim Meet Heat Sheet Generator")
 
 heat_order = st.selectbox(
@@ -14,28 +19,61 @@ heat_order = st.selectbox(
     ["fast_to_slow", "slow_to_fast"]
 )
 
-heat_size = st.number_input("Heat Size", 4, 10, 8)
+heat_size = st.number_input(
+    "Heat Size",
+    min_value=4,
+    max_value=10,
+    value=8
+)
 
-uploaded = st.file_uploader("Upload PDF", type=["pdf"])
-
-html_content = generate_html_preview(
-    meet_title,
-    heat_sheet,
-    set(favorites)
+uploaded = st.file_uploader(
+    "Upload Psych Sheet PDF",
+    type=["pdf"]
 )
 
 if uploaded:
 
+    # -----------------------------
+    # Extract PDF text
+    # -----------------------------
     reader = pypdf.PdfReader(uploaded)
-    text = "\n".join(p.extract_text() or "" for p in reader.pages)
-    # text = extract_text_from_pdf(uploaded_file)
+
+    text = "\n".join(
+        page.extract_text() or ""
+        for page in reader.pages
+    )
+
+    # -----------------------------
+    # Meet title
+    # -----------------------------
     meet_title = extract_meet_title(text)
 
+    # -----------------------------
+    # Parse events
+    # -----------------------------
     events = parse_psych_sheet(text)
 
-    all_names = sorted({s["name"] for e in events for s in e["swimmers"]})
-    favorites = st.multiselect("Favorites", all_names)
+    if not events:
+        st.error("No events found in PDF.")
+        st.stop()
 
+    # -----------------------------
+    # Favorites picker
+    # -----------------------------
+    all_names = sorted({
+        s["name"]
+        for e in events
+        for s in e["swimmers"]
+    })
+
+    favorites = st.multiselect(
+        "Favorite Swimmers",
+        all_names
+    )
+
+    # -----------------------------
+    # Build heat sheet
+    # -----------------------------
     heat_sheet = build_heat_sheet(
         events,
         heat_size,
@@ -43,7 +81,18 @@ if uploaded:
         is_long_event
     )
 
-    st.success("Heat sheet generated!")
+    st.success(
+        f"Generated {len(heat_sheet)} events"
+    )
+
+    # -----------------------------
+    # HTML Preview
+    # -----------------------------
+    html_content = generate_html_preview(
+        meet_title,
+        heat_sheet,
+        set(favorites)
+    )
 
     with st.expander("👁 Preview Heat Sheet", expanded=True):
         st.components.v1.html(
@@ -52,11 +101,32 @@ if uploaded:
             scrolling=True
         )
 
-    pdf_bytes = generate_pdf("Meet Heat Sheet", heat_sheet, set(favorites))
+    # -----------------------------
+    # PDF
+    # -----------------------------
+    pdf_bytes = generate_pdf(
+        meet_title,
+        heat_sheet,
+        set(favorites)
+    )
 
-    st.download_button(
-    "⬇ Download HTML",
-    html_content,
-    file_name="heat_sheet.html",
-    mime="text/html"
-)
+    # -----------------------------
+    # Downloads
+    # -----------------------------
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.download_button(
+            "⬇ Download HTML",
+            html_content,
+            file_name="heat_sheet.html",
+            mime="text/html"
+        )
+
+    with col2:
+        st.download_button(
+            "⬇ Download PDF",
+            pdf_bytes,
+            file_name="heat_sheet.pdf",
+            mime="application/pdf"
+        )
