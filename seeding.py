@@ -1,89 +1,50 @@
-from utils import time_to_seconds
-from models import Event, Heat, Swimmer
+from utils import time_to_seconds, is_long_event
 
-def seed_swimmers(swimmers, heat_size, order="fast_to_slow"):
 
-    sorted_swimmers = sorted(
-        swimmers,
-        key=lambda x: time_to_seconds(x.get("seed_time"))
+def seed_event(event, lanes=8, order="fast_to_slow"):
+    swimmers = sorted(
+        event["swimmers"],
+        key=lambda x: time_to_seconds(x["seed_time"])
     )
 
     if order == "slow_to_fast":
-        sorted_swimmers.reverse()
+        swimmers.reverse()
 
+    heats = []
     heat_num = 1
-    result = []
+    idx = 0
 
-    for i, s in enumerate(sorted_swimmers):
-        s = dict(s)
-        s["heat"] = heat_num
-        result.append(s)
+    while idx < len(swimmers):
+        chunk = swimmers[idx:idx + lanes]
 
-        if (i + 1) % heat_size == 0:
-            heat_num += 1
-
-    return result
-
-def seed_event(event, lanes=8):
-    swimmers = sorted(
-        event["swimmers"],
-        key=lambda x: x["rank"]
-    )
-
-    if not swimmers:
-        return []
-
-    num_swimmers = len(swimmers)
-    num_heats = (num_swimmers + lanes - 1) // lanes
-
-    heats_swimmers = []
-    remaining = swimmers[:]
-
-    for h in range(num_heats, 0, -1):
-        count = lanes if h > 1 else len(remaining)
-
-        if h > 1 and len(remaining) - count < 1 and len(remaining) > 1:
-            count = len(remaining) - 1
-
-        heats_swimmers.append(remaining[:count])
-        remaining = remaining[count:]
-
-    heats_swimmers.reverse()
-
-    if lanes == 8:
-        lane_order = [4, 5, 3, 6, 2, 7, 1, 8]
-    elif lanes == 6:
-        lane_order = [3, 4, 2, 5, 1, 6]
-    else:
-        lane_order = list(range(1, lanes + 1))
-
-    final_heats = []
-
-    for i, heat in enumerate(heats_swimmers):
-
-        heat.sort(key=lambda x: x["rank"])
-
-        assigned = {
-            str(lane_order[j]): swimmer
-            for j, swimmer in enumerate(heat)
-            if j < len(lane_order)
+        heat = {
+            "heat_number": heat_num,
+            "lanes": {
+                str(i + 1): s for i, s in enumerate(chunk)
+            }
         }
 
-        final_heats.append({
-            "heat_number": i + 1,
-            "lanes": assigned
-        })
+        heats.append(heat)
 
-    return final_heats
+        heat_num += 1
+        idx += lanes
 
-def build_heat_sheet(events, heat_size, order, is_long_event):
+    return heats
+
+
+def build_heat_sheet(events, lanes, order, is_long_event):
     heat_sheet = []
 
     for e in events:
+
+        # long distance override hook (future expansion)
+        if is_long_event(e["name"]):
+            pass
+
         heat_sheet.append({
             "number": e["number"],
             "name": e["name"],
-            "heats": seed_event(e, lanes=heat_size)
+            "heats": seed_event(e, lanes, order)
         })
 
     return heat_sheet
