@@ -35,7 +35,9 @@ def generate_pdf(meet_title, heat_sheet, favorites):
             pdf.set_font("Helvetica", "B", 9)
             pdf.cell(0, 5, f"Heat {heat['heat_number']}", ln=1)
 
-            for lane, s in heat["lanes"].items():
+            # Sort lanes by number
+            sorted_lanes = sorted(heat["lanes"].items(), key=lambda x: int(x[0]))
+            for lane, s in sorted_lanes:
 
                 fav = "★ " if s["name"] in favorites else ""
 
