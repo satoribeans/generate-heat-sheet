@@ -111,9 +111,19 @@ def parse_psych_sheet(text_content):
 
         event_match = event_re.search(line)
         if event_match:
+            event_num = event_match.group(1)
+            event_name = event_match.group(2).replace("...", "").strip()
+
+            if (current_event
+                and current_event["number"] == event_num
+                and len(current_event["swimmers"]) > 0
+            ):
+                # repeated header due to page break
+                continue
+            
             current_event = {
-                "number": event_match.group(1),
-                "name": event_match.group(2).replace("...", "").strip(),
+                "number": event_num,
+                "name": event_name,
                 "swimmers": []
             }
             events.append(current_event)
