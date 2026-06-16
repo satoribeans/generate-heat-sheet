@@ -44,11 +44,11 @@ if uploaded:
     st.success("Heat sheet generated!")
 
     with st.expander("👁 Preview Heat Sheet", expanded=True):
-    st.components.v1.html(
-        html_content,
-        height=800,
-        scrolling=True
-    )
+        st.components.v1.html(
+            html_content,
+            height=800,
+            scrolling=True
+        )
 
     pdf_bytes = generate_pdf("Meet Heat Sheet", heat_sheet, set(favorites))
 
