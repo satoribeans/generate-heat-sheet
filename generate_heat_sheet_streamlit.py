@@ -566,11 +566,11 @@ if uploaded_file:
             mime="application/pdf",
         )
         
-    pdf_bytes = generate_pdf(meet_title, heat_sheet, favorites)
+    # pdf_bytes = generate_pdf(meet_title, heat_sheet, favorites)
 
-    st.download_button(
-        "Download PDF",
-        pdf_bytes,
-        file_name="heat_sheet.pdf",
-        mime="application/pdf"
-    )
+    # st.download_button(
+    #     "Download PDF",
+    #     pdf_bytes,
+    #     file_name="heat_sheet.pdf",
+    #     mime="application/pdf"
+    # )
