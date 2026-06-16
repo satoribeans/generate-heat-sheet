@@ -312,7 +312,7 @@ def generate_pdf(meet_title, heat_sheet, favorites):
     
     for event in heat_sheet:
         # --- EVENT HEADER (full width) ---
-        pdf.set_font("Helvetica", "B", 10)
+        pdf.set_font("Helvetica", "B", 9)
         start_y = pdf.get_y()
         x = x_left if col == 0 else x_right
         y = y_left if col == 0 else y_right        
