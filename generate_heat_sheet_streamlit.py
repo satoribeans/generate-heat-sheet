@@ -26,6 +26,20 @@ def safe_text(text):
     # remove any remaining non-latin1 chars
     return text.encode("latin-1", "ignore").decode("latin-1")
 
+import math
+
+def time_to_seconds(t):
+    if not t or t == "NT":
+        return 9999
+
+    try:
+        if ":" in t:
+            m, s = t.split(":")
+            return int(m) * 60 + float(s)
+        return float(t)
+    except:
+        return 9999
+        
 # ==========================================================
 # MEET TITLE EXTRACTION
 # ==========================================================
@@ -209,38 +223,55 @@ def parse_psych_sheet(text_content):
     # SECOND PASS: SPLIT MIXED
     # ==========================
     final_events = []
+    HEAT_SIZE = 8   # adjust if needed
 
     for event in events:
+        # -------------------------
+        # NON-MIXED EVENTS
+        # -------------------------
         if "mixed" not in event["name"].lower():
             final_events.append(event)
             continue
 
-        girls, boys = [], []
+        # -------------------------
+        # COMBINE ALL SWIMMERS
+        # -------------------------
+        girls, boys = [], [] # used for seperating boys and girls
+        swimmers = event["swimmers"]
 
-        for s in event["swimmers"]:
-            g = s.get("gender")
+        # assign gender (optional but useful)
+        for s in swimmers:
+            if "gender" not in s:
+                age = str(s.get("age", "")).upper()
+                s["gender"] = "W" if age.startswith("W") else "M"
+                
+        # -------------------------
+        # SORT BY SEED TIME
+        # -------------------------
+        swimmers_sorted = sorted(swimmers, key=lambda x: time_to_seconds(x.get("seed_time")))
 
-            if not g:
-                g = "W" if str(s.get("age", "")).upper().startswith("W") else "M"
-
-            if g == "W":
-                girls.append(s)
-            else:
-                boys.append(s)
-
-        if girls:
-            final_events.append({
-                "number": event["number"],
-                "name": event["name"] + " - Girls",
-                "swimmers": girls
-            })
-
-        if boys:
-            final_events.append({
-                "number": event["number"],
-                "name": event["name"] + " - Boys",
-                "swimmers": boys
-            })
+        # -------------------------
+        # REBUILD HEATS
+        # -------------------------
+        heat_num = 1
+        new_swimmers = []
+    
+        for i, s in enumerate(swimmers_sorted):
+            s = dict(s)
+            s["heat"] = heat_num
+            new_swimmers.append(s)
+    
+            if (i + 1) % HEAT_SIZE == 0:
+                heat_num += 1
+    
+        # -------------------------
+        # RETURN AS SINGLE EVENT
+        # -------------------------
+        final_events.append({
+            "number": event["number"],
+            "name": event["name"] + " - Mixed (Combined Heats)",
+            "swimmers": new_swimmers
+        })
 
     return final_events
 
