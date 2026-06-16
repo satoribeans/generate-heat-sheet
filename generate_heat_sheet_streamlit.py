@@ -282,7 +282,87 @@ def seed_event(event, lanes=8):
 
     return final_heats
 
+def generate_pdf(meet_title, heat_sheet, favorites):
 
+    pdf = PDF()
+    pdf.title = meet_title
+    pdf.set_auto_page_break(True, margin=10)
+
+    # ---------------- FAVORITES ----------------
+    pdf.add_page()
+    pdf.set_font("Helvetica", "B", 14)
+    pdf.cell(0, 8, "Favorite Swimmers", ln=1)
+
+    pdf.set_font("Helvetica", "", 10)
+
+    for event in heat_sheet:
+        for heat in event["heats"]:
+            for lane, s in heat["lanes"].items():
+                if s["name"] in favorites:
+                    pdf.cell(0, 5,
+                             f"Event {event['number']} Heat {heat['heat_number']} Lane {lane} - {s['name']}",
+                             ln=1)
+
+    # ---------------- SUMMARY ----------------
+    pdf.add_page()
+    pdf.set_font("Helvetica", "B", 12)
+    pdf.cell(0, 8, "Meet Summary", ln=1)
+
+    pdf.set_font("Helvetica", "", 10)
+    pdf.cell(0, 6, f"Events: {len(heat_sheet)}", ln=1)
+    pdf.cell(0, 6, f"Favorites: {len(favorites)}", ln=1)
+
+    # ---------------- HEAT SHEETS ----------------
+    pdf.add_page()
+
+    x_left = pdf.l_margin
+    x_right = pdf.w / 2
+    y_left = pdf.get_y()
+    y_right = pdf.get_y()
+
+    col = 0
+
+    for event in heat_sheet:
+
+        x = x_left if col == 0 else x_right
+        y = y_left if col == 0 else y_right
+
+        pdf.set_xy(x, y)
+        pdf.set_font("Helvetica", "B", 9)
+        pdf.cell(0, 6, f"Event {event['number']}: {event['name']}", ln=1)
+
+        event_total_heats = len(event["heats"])
+
+        if col == 0:
+            y_left = pdf.get_y()
+        else:
+            y_right = pdf.get_y()
+
+        for heat in event["heats"]:
+
+            estimated_height = 8 * 5 + 10
+
+            if col == 0 and y_left + estimated_height > pdf.h - pdf.b_margin:
+                col = 1
+                x = x_right
+                y = y_right
+
+            elif col == 1 and y_right + estimated_height > pdf.h - pdf.b_margin:
+                pdf.add_page()
+                col = 0
+                x = x_left
+                y_left = pdf.get_y()
+                y_right = pdf.get_y()
+
+            h = pdf.print_heat(heat, event_total_heats, x, y)
+
+            if col == 0:
+                y_left += h + 4
+            else:
+                y_right += h + 4
+
+    return bytes(pdf.output(dest="S").encode("latin-1"))
+    
 # ==========================================================
 # STREAMLIT APP
 # ==========================================================
@@ -295,6 +375,15 @@ uploaded_file = st.file_uploader("Upload Psych Sheet PDF", type=["pdf"])
 
 if uploaded_file:
 
+    pdf_bytes = generate_pdf(meet_title, heat_sheet, set(favorites))
+
+    st.download_button(
+        "⬇ Download PDF",
+        data=pdf_bytes,
+        file_name="heat_sheet.pdf",
+        mime="application/pdf"
+    )
+    
     text = extract_text_from_pdf(uploaded_file)
     meet_title = extract_meet_title(text)
 
