@@ -99,7 +99,8 @@ def parse_psych_sheet(text_content):
     mixed_base_event = None
 
     event_re = re.compile(r'(?:Event\s+|#)(\d+)\s+(.*)')
-    gender_header_re = re.compile(r'^(W\d+|M\d+)$', re.IGNORECASE)
+    # gender_header_re = re.compile(r'^(W\d+|M\d+)$', re.IGNORECASE)
+    gender_header_re = re.compile(r'^(W\d+|M\d+)\s*&?\s*Under', re.IGNORECASE)
     
     seed_time_pattern = r'(NT|\d+:?\d*\.\d+)'
 
@@ -156,6 +157,9 @@ def parse_psych_sheet(text_content):
         # Mixed-event gender section
         # ===========================
         gender_match = gender_header_re.match(line)
+        if gender_match:
+            current_gender = gender_match.group(1)[0].upper()  # W or M
+            continue
 
         if gender_match and mixed_base_event:
             gender_code = gender_match.group(1).upper()
@@ -238,6 +242,9 @@ def parse_psych_sheet(text_content):
                 }
 
         if swimmer_data:
+            if current_gender:
+                swimmer_data["gender"] = current_gender
+            
             current_event["swimmers"].append(swimmer_data)
 
     final_events = []
