@@ -219,7 +219,7 @@ class PDF(FPDF):
         self.cell(0, 8, self.title, ln=1, align="C")
         self.ln(2)
 
-    def print_heat(self, heat, event_total_heats):
+    def print_heat(self, heat, event_total_heats, x, y):
         self.set_xy(x, y)
 
         start_y =y
