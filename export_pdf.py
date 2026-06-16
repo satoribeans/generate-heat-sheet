@@ -46,8 +46,8 @@ def generate_pdf(meet_title, heat_sheet, favorites):
                 pdf.cell(0, 5, safe_text(text), ln=1)
 
     
-    output = pdf.output(dest="S")
-    if isinstance(output, (bytes, bytearray)):
-        return bytes(output)
+    # output = pdf.output(dest="S")
+    # if isinstance(output, (bytes, bytearray)):
+    #     return bytes(output)
 
     return output.encode("latin-1")
