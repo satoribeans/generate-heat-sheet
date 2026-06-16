@@ -1,6 +1,6 @@
 from fpdf import FPDF
 from utils import safe_text
-
+import pypdf
 
 class PDF(FPDF):
     def header(self):
