@@ -200,7 +200,7 @@ def build_index(heat_sheet, favorites):
             for lane, s in heat["lanes"].items():
                 if s["name"] in favorites:
                     index[s["name"]].append(
-                        f"Event {event['number']} Heat {heat['heat_number']} Lane {lane}"
+                        f"Event {event['number']} Heat {heat['heat_number']} Lane {lane} {event['name']}"
                     )
     return index
 
