@@ -198,6 +198,21 @@ def parse_psych_sheet(text_content):
             }
 
         # =========
+        # Format C
+        # =========
+        if not swimmer_data:
+            mC = swimmer_re_C.match(line)
+
+            if mC:
+                swimmer_data = {
+                    "rank": int(mC.group(1)),
+                    "name": mC.group(2).strip(),
+                    "age": mC.group(3),
+                    "team": mC.group(4),
+                    "seed_time": mC.group(5)
+                }
+
+        # =========
         # Format A
         # =========
         if not swimmer_data:
