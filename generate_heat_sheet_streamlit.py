@@ -96,8 +96,11 @@ def clean_line(line):
 def parse_psych_sheet(text_content):
     events = []
     current_event = None
+    mixed_base_event = None
 
     event_re = re.compile(r'(?:Event\s+|#)(\d+)\s+(.*)')
+    gender_header_re = re.compile(r'^(W\d+|M\d+)$', re.IGNORECASE)
+    
     seed_time_pattern = r'(NT|\d+:?\d*\.\d+)'
 
     swimmer_re_A = re.compile(r'^(\S+)\s+' + seed_time_pattern + r'\s+(\d+)\s+(.*?)\s+(\d+)$')
@@ -108,32 +111,81 @@ def parse_psych_sheet(text_content):
         line = clean_line(line)
         if not line:
             continue
-
+            
+        # =============
+        # Event header
+        # =============
         event_match = event_re.search(line)
         if event_match:
             event_num = event_match.group(1)
             event_name = event_match.group(2).replace("...", "").strip()
 
+            # ===================================
+            # Page-break continuation:
+            # Event header repeated on next page
+            # ===================================
             if (current_event
                 and current_event["number"] == event_num
                 and len(current_event["swimmers"]) > 0
             ):
                 # repeated header due to page break
                 continue
+
+            # ============
+            # Mixed event
+            # ============
+            if "mixed" in event_name.lower():
+                mixed_base_event = {
+                    "number": event_num,
+                    "name": event_name
+                }
+                current_event = None
+            else:
+                mixed_base_event = None
             
+                current_event = {
+                    "number": event_num,
+                    "name": event_name,
+                    "swimmers": []
+                }
+                events.append(current_event)
+                
+            continue
+
+        # ===========================
+        # Mixed-event gender section
+        # ===========================
+        gender_match = gender_header_re.match(line)
+
+        if gender_match and mixed_base_event:
+            gender_code = gender_match.group(1).upper()
+
+            gender_name = (
+                "Girls"
+                if gender_code.startswith("W")
+                else "Boys"
+            )
+
             current_event = {
-                "number": event_num,
-                "name": event_name,
+                "number": mixed_base_event["number"],
+                "name": f"{mixed_base_event['name']} - {gender_name}",
                 "swimmers": []
             }
+
             events.append(current_event)
             continue
 
+        # ====================================
+        # Ignore lines until we have an event
+        # ====================================
         if not current_event:
             continue
 
         swimmer_data = None
 
+        # =========
+        # Format B
+        # =========
         mB = swimmer_re_B.match(line)
         if mB:
             age_match = re.search(r'\d+', mB.group(3))
@@ -145,6 +197,9 @@ def parse_psych_sheet(text_content):
                 "rank": int(mB.group(5))
             }
 
+        # =========
+        # Format A
+        # =========
         if not swimmer_data:
             mC = swimmer_re_C.match(line)
             if mC:
