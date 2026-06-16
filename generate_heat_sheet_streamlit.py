@@ -29,11 +29,12 @@ if uploaded:
     all_names = sorted({s["name"] for e in events for s in e["swimmers"]})
     favorites = st.multiselect("Favorites", all_names)
 
+    from utils import is_long_event as is_long_event_func
     heat_sheet = build_heat_sheet(
         events,
         heat_size,
         heat_order,
-        is_long_event
+        is_long_event_func
     )
 
     st.success("Generated!")
