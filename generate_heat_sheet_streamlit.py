@@ -240,6 +240,43 @@ def parse_psych_sheet(text_content):
         if swimmer_data:
             current_event["swimmers"].append(swimmer_data)
 
+    final_events = []
+
+    for event in events:
+        if "mixed" not in event["name"].lower():
+            final_events.append(event)
+            continue
+    
+        girls = []
+        boys = []
+    
+        for s in event["swimmers"]:
+            gender = s.get("gender")
+    
+            # fallback: infer from age if needed
+            if not gender:
+                age = str(s.get("age", "")).upper()
+                gender = "W" if age.startswith("W") else "M"
+    
+            if gender == "W":
+                girls.append(s)
+            else:
+                boys.append(s)
+    
+        if girls:
+            final_events.append({
+                "number": event["number"],
+                "name": event["name"] + " - Girls",
+                "swimmers": girls
+            })
+    
+        if boys:
+            final_events.append({
+                "number": event["number"],
+                "name": event["name"] + " - Boys",
+                "swimmers": boys
+            })
+
     return events
 
 
