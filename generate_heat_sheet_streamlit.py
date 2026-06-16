@@ -6,6 +6,7 @@ from seeding import build_heat_sheet
 from pdf_export import generate_pdf
 from html_export import generate_html_preview
 from utils import is_long_event, extract_meet_title
+from models import Event, Heat, Swimmer
 
 st.set_page_config(
     page_title="Heat Sheet Generator",
