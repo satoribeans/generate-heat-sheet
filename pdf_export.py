@@ -1,3 +1,11 @@
+from fpdf import FPDF
+from utils import safe_text
+
+class PDF(FPDF):
+    def header(self):
+        self.set_font("Helvetica", "B", 12)
+        self.cell(0, 8, self.title, ln=1, align="C")
+
 def generate_pdf(meet_title, heat_sheet, favorites):
 
     pdf = PDF()
