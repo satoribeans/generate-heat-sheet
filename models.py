@@ -1,4 +1,4 @@
-from typing import TypedDict, List, Dict, Any
+from typing import TypedDict, Dict, List, Optional
 
 class Swimmer(TypedDict):
     name: str
@@ -6,7 +6,7 @@ class Swimmer(TypedDict):
     age: str
     team: str
     rank: int
-    gender: str | None
+    gender: Optional[str]
 
 class Heat(TypedDict):
     heat_number: int
@@ -15,4 +15,5 @@ class Heat(TypedDict):
 class Event(TypedDict):
     number: str
     name: str
-    heats: List[Heat]
+    swimmers: List[Swimmer]   # ONLY parser uses this
+    heats: List[Heat]         # everything else uses this
