@@ -2,6 +2,7 @@ import streamlit as st
 from parser import parse_psych_sheet
 from seeding import build_heat_sheet
 from pdf_export import generate_pdf
+from html_export import generate_html_preview
 from utils import is_long_event
 import pypdf
 
@@ -16,6 +17,12 @@ heat_order = st.selectbox(
 heat_size = st.number_input("Heat Size", 4, 10, 8)
 
 uploaded = st.file_uploader("Upload PDF", type=["pdf"])
+
+html_content = generate_html_preview(
+    meet_title,
+    heat_sheet,
+    set(favorites)
+)
 
 if uploaded:
 
@@ -36,10 +43,18 @@ if uploaded:
 
     st.success("Heat sheet generated!")
 
+    with st.expander("👁 Preview Heat Sheet", expanded=True):
+    st.components.v1.html(
+        html_content,
+        height=800,
+        scrolling=True
+    )
+
     pdf_bytes = generate_pdf("Meet Heat Sheet", heat_sheet, set(favorites))
 
     st.download_button(
-        "Download PDF",
-        pdf_bytes,
-        file_name="heat_sheet.pdf"
-    )
+    "⬇ Download HTML",
+    html_content,
+    file_name="heat_sheet.html",
+    mime="text/html"
+)
