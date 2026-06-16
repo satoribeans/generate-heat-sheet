@@ -40,9 +40,9 @@ if uploaded:
     st.success("Generated!")
 
     html = generate_html_preview(meet_title, heat_sheet, set(favorites))
-    pdf = generate_pdf(meet_title, heat_sheet, set(favorites))
+    # pdf = generate_pdf(meet_title, heat_sheet, set(favorites))
 
     st.components.v1.html(html, height=600, scrolling=True)
 
     st.download_button("Download HTML", html)
-    st.download_button("Download PDF", pdf, file_name="heat.pdf")
+    # st.download_button("Download PDF", pdf, file_name="heat.pdf")
