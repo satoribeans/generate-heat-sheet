@@ -225,7 +225,7 @@ class PDF(FPDF):
 
         start_y =y
 
-        self.set_font("Helvetica", "B", 10)
+        self.set_font("Helvetica", "B", 9)
         self.cell(0, 6, safe_text(f"Heat {heat['heat_number']} of {event_total_heats}"), ln=1)
 
         self.set_font("Helvetica", "", 9)
@@ -338,6 +338,7 @@ def generate_pdf(meet_title, heat_sheet, favorites):
                 # page right column full -> new page
                 if y + estimated_height > pdf.h - pdf.b_margin:
                     pdf.add_page()
+                    pdf.set_font("Helvetica", "B", 10)
                     pdf.cell(0, 6, safe_text(f"Event {event['number']}: {event['name']}"), new_x="LMARGIN", new_y="NEXT")
                     y_left = pdf.get_y()
                     y_right = pdf.get_y()
