@@ -36,7 +36,7 @@ def extract_meet_title(text):
     title_lines = []
     for line in lines[:30]:  # only scan top of doc
         line = line.strip()
-        # line = re.sub(r"psyc", "heat", title_lines, flags=re.IGNORECASE)
+        line = re.sub(r"\bpsyc\s+sheet\b", "Heat Sheet", line, flags=re.IGNORECASE)
 
         if not line:
             continue
@@ -276,7 +276,7 @@ def generate_pdf(meet_title, heat_sheet, favorites):
 
         pdf.set_font("Helvetica", "", 10)
         for it in items:
-            pdf.cell(0, 5, it, ln=1)
+            pdf.cell(5, 5, it, ln=1)
 
     # ---------------- SUMMARY PAGE ----------------
     # pdf.add_page()
