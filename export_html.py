@@ -8,7 +8,9 @@ def generate_html_preview(meet_title, heat_sheet, favorites):
         for heat in event["heats"]:
             rows.append(f"<b>Heat {heat['heat_number']}</b>")
 
-            for lane, s in heat["lanes"].items():
+            # Sort lanes by number
+            sorted_lanes = sorted(heat["lanes"].items(), key=lambda x: int(x[0]))
+            for lane, s in sorted_lanes:
 
                 fav = "★ " if s["name"] in favorites else ""
 
