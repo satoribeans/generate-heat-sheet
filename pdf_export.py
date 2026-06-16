@@ -1,5 +1,6 @@
 from fpdf import FPDF
 from utils import safe_text
+from models import Event, Heat, Swimmer
 
 class PDF(FPDF):
     def header(self):
