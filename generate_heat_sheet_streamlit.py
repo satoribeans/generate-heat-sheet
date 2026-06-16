@@ -338,17 +338,13 @@ def generate_pdf(meet_title, heat_sheet, favorites):
                 # page right column full -> new page
                 if y + estimated_height > pdf.h - pdf.b_margin:
                     pdf.add_page()
-                    pdf.cell(0, 6, safe_text(f"Event {event['number']}: {event['name']}"))
+                    pdf.cell(0, 6, safe_text(f"Event {event['number']}: {event['name']}"), pdf.get_x(), pdf.get_y())
                     y_left = pdf.get_y()
                     y_right = pdf.get_y()
                     col = 0;
                     x = x_left
-                    y = y_left
+                    y = y_left + 6
                         
-            # # add event name for a new page
-            # if is_new_page == 1 and heat['heat_number'] > 1:
-            #     pdf.cell(0, 6, safe_text(f"Event {event['number']}: {event['name']}"))
-            #     is_new_page = 0
             # print heat
             h = pdf.print_heat(heat, event_total_heats, x, y)
 
@@ -396,12 +392,12 @@ if uploaded_file:
             "heats": seed_event(e)
         })
 
-    st.download_button(
-        "Download JSON",
-        json.dumps(heat_sheet, indent=2),
-        file_name="heat_sheet.json",
-        mime="application/json"
-    )
+    # st.download_button(
+    #     "Download JSON",
+    #     json.dumps(heat_sheet, indent=2),
+    #     file_name="heat_sheet.json",
+    #     mime="application/json"
+    # )
 
     pdf_bytes = generate_pdf(meet_title, heat_sheet, favorites)
 
