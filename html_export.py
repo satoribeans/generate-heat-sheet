@@ -1,3 +1,5 @@
+from models import Event, Heat, Swimmer
+
 def generate_html_preview(meet_title, heat_sheet, favorites):
 
     rows = []
