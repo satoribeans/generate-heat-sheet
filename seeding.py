@@ -1,4 +1,5 @@
 from utils import time_to_seconds
+from models import Event, Heat, Swimmer
 
 def seed_swimmers(swimmers, heat_size, order="fast_to_slow"):
 
