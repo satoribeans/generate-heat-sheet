@@ -347,8 +347,8 @@ def generate_pdf(meet_title, heat_sheet, favorites):
                 # page right column full -> new page
                 if y + estimated_height > pdf.h - pdf.b_margin:
                     pdf.add_page()
-                    pdf.set_font("Helvetica", "B", 10)
-                    pdf.cell(0, 6, safe_text(f"Event {event['number']}: {event['name']}")) #, new_x="LMARGIN", new_y="NEXT"
+                    pdf.set_font("Helvetica", "B", 9)
+                    pdf.cell(0, 6, safe_text(f"Event {event['number']}: {event['name']}"))
                     y_left = pdf.get_y() + 5
                     y_right = pdf.get_y()
                     col = 0;
