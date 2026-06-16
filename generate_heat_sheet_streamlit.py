@@ -28,6 +28,8 @@ if uploaded:
 
     reader = pypdf.PdfReader(uploaded)
     text = "\n".join(p.extract_text() or "" for p in reader.pages)
+    # text = extract_text_from_pdf(uploaded_file)
+    meet_title = extract_meet_title(text)
 
     events = parse_psych_sheet(text)
 
