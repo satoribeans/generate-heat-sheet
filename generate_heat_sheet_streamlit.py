@@ -219,13 +219,12 @@ class PDF(FPDF):
         self.cell(0, 8, self.title, ln=1, align="C")
         self.ln(2)
 
-    def print_heat(self, heat, event_total_heats, x, y):
+    def print_heat(self, heat, event_total_heats):
         self.set_xy(x, y)
 
         start_y =y
 
         self.set_font("Helvetica", "B", 10)
-        
         self.cell(0, 6, safe_text(f"Heat {heat['heat_number']} of {event_total_heats}"), ln=1)
 
         self.set_font("Helvetica", "", 9)
@@ -317,6 +316,7 @@ def generate_pdf(meet_title, heat_sheet, favorites):
 
         event_total_heats = len(event["heats"])
         for heat in event["heats"]:
+            is_new_page = 0
             # estimate height (important for page breaks)
             estimated_height = 8 * pdf.line_height + 10
 
@@ -343,8 +343,13 @@ def generate_pdf(meet_title, heat_sheet, favorites):
                     col = 0;
                     x = x_left
                     y = y_left
+                    is_new_page = 1
                         
-            # render
+            # add event name for a new page
+            if is_new_page == 1 and heat['heat_number'] > 1:
+                pdf.cell(0, 6, safe_text(f"Event {event['number']}: {event['name']}"))
+                is_new_page = 0
+            # print heat
             h = pdf.print_heat(heat, event_total_heats, x, y)
 
             # update ONLY that column's Y
