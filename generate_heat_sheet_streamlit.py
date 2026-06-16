@@ -36,6 +36,7 @@ def extract_meet_title(text):
     title_lines = []
     for line in lines[:30]:  # only scan top of doc
         line = line.strip()
+        line = re.sub(r"\bpsych\s+sheet\b", "Heat Sheet", line, flags=re.IGNORECASE)
         line = re.sub(r"\bpsyc\s+sheet\b", "Heat Sheet", line, flags=re.IGNORECASE)
 
         if not line:
@@ -316,7 +317,6 @@ def generate_pdf(meet_title, heat_sheet, favorites):
 
         event_total_heats = len(event["heats"])
         for heat in event["heats"]:
-            is_new_page = 0
             # estimate height (important for page breaks)
             estimated_height = 8 * pdf.line_height + 10
 
@@ -338,17 +338,17 @@ def generate_pdf(meet_title, heat_sheet, favorites):
                 # page right column full -> new page
                 if y + estimated_height > pdf.h - pdf.b_margin:
                     pdf.add_page()
+                    pdf.cell(0, 6, safe_text(f"Event {event['number']}: {event['name']}"))
                     y_left = pdf.get_y()
                     y_right = pdf.get_y()
                     col = 0;
                     x = x_left
                     y = y_left
-                    is_new_page = 1
                         
-            # add event name for a new page
-            if is_new_page == 1 and heat['heat_number'] > 1:
-                pdf.cell(0, 6, safe_text(f"Event {event['number']}: {event['name']}"))
-                is_new_page = 0
+            # # add event name for a new page
+            # if is_new_page == 1 and heat['heat_number'] > 1:
+            #     pdf.cell(0, 6, safe_text(f"Event {event['number']}: {event['name']}"))
+            #     is_new_page = 0
             # print heat
             h = pdf.print_heat(heat, event_total_heats, x, y)
 
