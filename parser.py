@@ -1,5 +1,6 @@
 import re
 from utils import clean_line
+from models import Event, Heat, Swimmer
 
 event_re = re.compile(r'(?:Event\s+|#)(\d+)\s+(.*)')
 gender_header_re = re.compile(r'^(W\d+|M\d+)\s*&?\s*Under', re.IGNORECASE)
