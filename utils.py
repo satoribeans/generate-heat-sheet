@@ -42,3 +42,30 @@ def clean_line(line):
 def is_long_event(name):
     name = name.lower()
     return any(x in name for x in ["400", "500", "800", "1500"])
+
+# ==========================================================
+# TITLE EXTRACTION
+# ==========================================================
+def extract_meet_title(text):
+    lines = text.splitlines()
+    title_lines = []
+
+    for line in lines[:30]:
+        line = line.strip()
+
+        line = re.sub(r"\bpsych\s+sheet\b", "Heat Sheet", line, flags=re.IGNORECASE)
+        line = re.sub(r"\bpsyc\s+sheet\b", "Heat Sheet", line, flags=re.IGNORECASE)
+
+        if not line:
+            continue
+
+        if re.search(r'(?:Event\s+|#)\d+', line):
+            break
+
+        if "PAGE" in line.upper():
+            continue
+
+        title_lines.append(line)
+
+    return " - ".join(title_lines[:3]) if title_lines else "Swim Meet Heat Sheet"
+
