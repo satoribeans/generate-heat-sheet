@@ -1,16 +1,18 @@
-from dataclasses import dataclass
+from typing import TypedDict, List, Dict, Any
 
-@dataclass
-class Swimmer:
+class Swimmer(TypedDict):
     name: str
+    seed_time: str
     age: str
     team: str
-    seed_time: str
     rank: int
-    gender: str | None = None
+    gender: str | None
 
-@dataclass
-class Event:
+class Heat(TypedDict):
+    heat_number: int
+    lanes: Dict[str, Swimmer]
+
+class Event(TypedDict):
     number: str
     name: str
-    swimmers: list
+    heats: List[Heat]
