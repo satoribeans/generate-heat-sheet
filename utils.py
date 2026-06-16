@@ -1,3 +1,5 @@
+import re
+
 def safe_text(text):
     if not text:
         return ""
