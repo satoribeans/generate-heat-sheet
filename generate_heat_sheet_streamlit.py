@@ -1,8 +1,8 @@
+from fpdf import FPDF
 import streamlit as st
 import pypdf
 import re
 import json
-from fpdf import FPDF
 
 # ==========================================================
 # UI OPTIONS
@@ -281,6 +281,35 @@ def seed_event(event, lanes=8):
         })
 
     return final_heats
+
+class PDF(FPDF):
+    def header(self):
+        self.set_font("Helvetica", "B", 12)
+        self.cell(0, 8, self.title, ln=1, align="C")
+        self.ln(2)
+
+    def print_heat(self, heat, event_total_heats, x, y):
+        self.set_xy(x, y)
+        start_y = y
+
+        self.set_font("Helvetica", "B", 9)
+        self.cell(0, 6, f"Heat {heat['heat_number']} of {event_total_heats}", ln=1)
+
+        self.set_font("Helvetica", "", 9)
+
+        for lane in range(1, 9):
+            s = heat["lanes"].get(str(lane))
+            if not s:
+                continue
+
+            self.set_x(x)
+            self.cell(5, 5, str(lane), 0, 0, "C")
+            self.cell(50, 5, s["name"][:22], 0, 0, "L")
+            self.cell(10, 5, str(s.get("age", "")), 0, 0, "C")
+            self.cell(15, 5, s.get("team", "")[:8], 0, 0, "L")
+            self.cell(20, 5, s.get("seed_time", ""), 0, 1, "R")
+
+        return self.get_y() - start_y
 
 def generate_pdf(meet_title, heat_sheet, favorites):
 
