@@ -1,48 +1,111 @@
 import streamlit as st
 import pypdf
 
+from export_html import generate_html_preview
+from export_pdf import generate_pdf
+from models import Meet, MeetSettings
 from parser import parse_psych_sheet
 from seeding import build_heat_sheet
-from export_pdf import generate_pdf
-from export_html import generate_html_preview
-from utils import extract_meet_title, is_long_event
+from utils import extract_meet_title
 
 
 st.set_page_config(layout="wide")
 st.title("🏊 Heat Sheet Generator")
 
+# --------------------------------------------------
+#  Always Show Meet Settings
+# --------------------------------------------------
+st.sidebar.header("Meet Settings")
+lanes = st.sidebar.selectbox(
+    "Lanes per Heat",
+    options=[8, 10],
+    index=0
+)
+
+circle_seed_top_n_heats = st.sidebar.number_input(
+    "Circle Seed Top N Heats",
+    min_value=1,
+    max_value=10,
+    value=1,
+    step=1
+)
+
+distance_event_order = st.sidebar.selectbox(
+    "Long Distance Event Heat Order",
+    options=["Fast to Slow", "Slow to Fast"],
+    index=0
+)
+
+distance_event_order = {
+    "Fast to Slow": "fast_to_slow",
+    "Slow to Fast": "slow_to_fast"
+}[distance_event_order]
+
+st.sidebar.caption(
+    "Only used for long-distance events. "
+    "All other events use standard seeding."
+)
+
 uploaded = st.file_uploader("Upload PDF", type=["pdf"])
 
-heat_order = st.selectbox("Heat Order", ["fast_to_slow", "slow_to_fast"])
-heat_size = st.number_input("Heat Size", 4, 10, 8)
+if "all_names" not in st.session_state:
+    st.session_state["all_names"] = []
 
-if uploaded:
+if "favorites" not in st.session_state:
+    st.session_state["favorites"] = []
 
+if uploaded and "meet" not in st.session_state:
     text = "\n".join(
         p.extract_text() or "" for p in pypdf.PdfReader(uploaded).pages
     )
 
     meet_title = extract_meet_title(text)
-
     events = parse_psych_sheet(text)
 
-    all_names = sorted({s["name"] for e in events for s in e["swimmers"]})
-    favorites = st.multiselect("Favorites", all_names)
-
-    from utils import is_long_event as is_long_event_func
-    heat_sheet = build_heat_sheet(
-        events,
-        heat_size,
-        heat_order,
-        is_long_event_func
+    settings = MeetSettings(
+        lanes=lanes,
+        circle_seed_top_n_heats=circle_seed_top_n_heats,
+        distance_event_order=distance_event_order
     )
 
-    st.success("Generated!")
+    meet = Meet(
+        name=meet_title,
+        events=events,
+        settings=settings,
+    )
+    st.session_state["meet"] = meet
+    st.session_state["meet_title"] = meet_title
+    st.session_state["all_names"] = sorted(
+        {e.swimmer.name for e in meet.all_entries()}
+    )
 
-    html = generate_html_preview(meet_title, heat_sheet, set(favorites))
-    # pdf = generate_pdf(meet_title, heat_sheet, set(favorites))
+# Always visible
+favorites = st.multiselect(
+    "Favorites",
+    st.session_state["all_names"],
+    default=st.session_state.get("favorites", [])
+)
+st.session_state["favorites"] = favorites
 
-    st.components.v1.html(html, height=600, scrolling=True)
+generate = st.button("Generate Heat Sheet")
+
+if generate and "meet" in st.session_state:
+    meet = st.session_state["meet"]
+    meet_title = st.session_state["meet_title"]
+
+    heat_sheet = build_heat_sheet(meet)
+
+    st.session_state["heat_sheet"] = heat_sheet
+
+    html = generate_html_preview(meet.name, heat_sheet, set(st.session_state["favorites"]))
+
+    pdf = generate_pdf(meet_title, heat_sheet, set(st.session_state["favorites"]))
 
     st.download_button("Download HTML", html)
-    # st.download_button("Download PDF", pdf, file_name="heat.pdf")
+    st.download_button("Download PDF", pdf, file_name="heat.pdf")
+
+    st.components.v1.html(html, height=800, scrolling=True)
+
+    st.session_state["heat_sheet"] = heat_sheet
+    st.session_state["html"] = html
+    st.session_state["pdf"] = pdf
