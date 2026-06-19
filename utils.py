@@ -18,16 +18,15 @@ def safe_text(text):
     return text.encode("latin-1", "ignore").decode("latin-1")
 
 
-def time_to_seconds(t):
-    if not t or t == "NT":
-        return 9999
-    try:
-        if ":" in t:
-            m, s = t.split(":")
-            return int(m) * 60 + float(s)
-        return float(t)
-    except (ValueError, TypeError):
-        return 9999
+def time_to_seconds(time_str):
+    if time_str == "NT":
+        return float("inf")
+
+    if ":" in time_str:
+        minutes, seconds = time_str.split(":")
+        return int(minutes) * 60 + float(seconds)
+
+    return float(time_str)
 
 
 def clean_line(line):
@@ -43,7 +42,7 @@ def clean_line(line):
 
 def is_long_event(name):
     name = name.lower()
-    return any(x in name for x in ["400", "500", "800", "1500"])
+    return any(x in name for x in ["400", "500", "800", "1500", "1650"])
 
 # ==========================================================
 # TITLE EXTRACTION
