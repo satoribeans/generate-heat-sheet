@@ -1,67 +1,117 @@
+import string
+import streamlit as st
+
+from models import Heat, Lane
 from utils import time_to_seconds, is_long_event
 
 
-def seed_event(event, lanes=8):
-    swimmers = sorted(event["swimmers"], key=lambda x: x.get("rank", 0))
-    if not swimmers:
+# -----------------------------
+# Convert Entry objects → sortable list
+# -----------------------------
+def sort_entries(entries, order):
+    if order == "fast_to_slow":
+        return sorted(
+            entries,
+            key=lambda e: time_to_seconds(e.entry_time)
+        )
+
+    return sorted(
+        entries,
+        key=lambda e: time_to_seconds(e.entry_time),
+        reverse=True
+    )
+
+# -----------------------------
+# Heat assignment (circle seeding style)
+# -----------------------------
+def seed_event(entries, lane_count=8):
+    if not entries:
         return []
 
-    num_heats = (len(swimmers) + lanes - 1) // lanes
-    heats_swimmers = []
-    remaining = swimmers[:]
+    # entries should already be sorted:
+    #   normal events -> by seed_num
+    #   distance events -> by entry_time according to settings
+    lane_order = (
+        [4, 5, 3, 6, 2, 7, 1, 8]
+        if lane_count == 8
+        else [5, 6, 4, 7, 3, 8, 2, 9, 1, 10]
+    )
+    num_heats = (len(entries) + lane_count - 1) // lane_count
 
+    heats_entries = []
+    remaining = list(entries)
+
+    # Build heats from fastest to slowest
     for h in range(num_heats, 0, -1):
-        count = lanes if h > 1 else len(remaining)
-        heats_swimmers.append(remaining[:count])
+
+        # count = lane_count if h > 1 else len(remaining)
+        count = min(lane_count, len(remaining))
+
+        # avoid empty heat #1
+        if h > 1 and len(remaining) - count < 1 and len(remaining) > 1:
+            count = len(remaining) - 1
+
+        heats_entries.append(remaining[:count])
         remaining = remaining[count:]
 
-    heats_swimmers.reverse()
-
-    lane_order = [4, 5, 3, 6, 2, 7, 1, 8] if lanes == 8 else [3, 4, 2, 5, 1, 6]
+    # Heat 1 = slowest heat
+    # Last heat = fastest heat
+    heats_entries.reverse()
 
     final_heats = []
-    for i, h_list in enumerate(heats_swimmers):
-        h_list.sort(key=lambda x: x.get("rank", 0))
-        assigned = {
-            str(lane_order[j]): s
-            for j, s in enumerate(h_list)
-            if j < len(lane_order)
-        }
-        final_heats.append({
-            "heat_number": i + 1,
-            "lanes": assigned
-        })
+
+    for heat_num, heat_entries in enumerate(
+        heats_entries,
+        start=1
+    ):
+        heat_lanes = []
+
+        for idx, entry in enumerate(heat_entries):
+            lane_num = lane_order[idx]
+
+            entry.heat_number = heat_num
+            entry.lane_number = lane_num
+
+            heat_lanes.append(
+                Lane(
+                    lane_number=lane_num,
+                    entry=entry,
+                )
+            )
+
+        final_heats.append(
+            Heat(
+                heat_number= entry.heat_number,
+                lanes = heat_lanes
+            )
+        )
 
     return final_heats
 
 
-def seed_swimmers_by_time(swimmers, heat_size, order):
-    swimmers_sorted = sorted(swimmers, key=lambda x: time_to_seconds(x.get("seed_time")))
-
-    if order == "slow_to_fast":
-        swimmers_sorted.reverse()
-
-    # We update the rank based on the sorted order to use seed_event's logic
-    for i, s in enumerate(swimmers_sorted):
-        s["rank"] = i + 1
-
-    return swimmers_sorted
-
-
-def build_heat_sheet(events, lanes, order, is_long_event_func):
+# -----------------------------
+# Main entry point
+# -----------------------------
+def build_heat_sheet(meet):
     heat_sheet = []
 
-    for e in events:
-        swimmers = e["swimmers"]
+    lanes = meet.settings.lanes
+    order = meet.settings.distance_event_order
 
-        # apply custom seeding only for long/mixed events
-        if "mixed" in e["name"].lower() or is_long_event_func(e["name"]):
-            swimmers = seed_swimmers_by_time(swimmers, lanes, order)
+    for event in meet.events:
+
+        entries = event.entries
+
+        # long/mixed event logic
+        if "mixed" in event.name.lower():
+            entries = sort_entries(entries, order)
+
+        heats = seed_event(entries, lanes)
 
         heat_sheet.append({
-            "number": e["number"],
-            "name": e["name"],
-            "heats": seed_event({"swimmers": swimmers}, lanes)
+            "event_number": event.event_number,
+            "event_name": event.name,
+            "heats": heats
         })
 
     return heat_sheet
