@@ -3,15 +3,20 @@ import streamlit as st
 
 
 class PDF(FPDF):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.add_font("DejaVu", "", "fonts/DejaVuSans.ttf", uni=True)
+        self.add_font("DejaVu", "B", "fonts/DejaVuSans-Bold.ttf", uni=True)
+
     def header(self):
-        self.set_font("Helvetica", "B", 12)
+        self.set_font("DejaVu", "B", 12)
         self.cell(0, 8, self.title, ln=1, align="C")
         self.ln(2)
 
     def print_event_header(self, event, x, y, width):
         self.set_xy(x, y)
 
-        self.set_font("Helvetica", "B", 9)
+        self.set_font("DejaVu", "B", 9)
 
         self.multi_cell(
             width,
@@ -25,7 +30,7 @@ class PDF(FPDF):
     def print_heat(self, heat, event_total_heats, x, y):
         self.set_xy(x, y)
         # Heat 2 of 15
-        self.set_font("Helvetica", "B", 9)
+        self.set_font("DejaVu", "B", 9)
         self.cell(
             0,
             5,
@@ -34,7 +39,7 @@ class PDF(FPDF):
         )
 
         # 1 John Doe 15 NCAC 1:23.45
-        self.set_font("Helvetica", "", 9)
+        self.set_font("DejaVu", "", 9)
         for lane in sorted(heat.lanes, key=lambda l: l.lane_number):
             entry = lane.entry
             if not entry:
@@ -64,7 +69,7 @@ def generate_pdf(meet_title, events, favorites):
     # --------------------------------------------------
     pdf.add_page()
 
-    pdf.set_font("Helvetica", "B", 14)
+    pdf.set_font("DejaVu", "B", 14)
     pdf.cell(0, 8, "Favorite Swimmers", ln=1)
 
     pdf.set_font("Helvetica", "", 10)
