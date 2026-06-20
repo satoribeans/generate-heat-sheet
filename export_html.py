@@ -199,7 +199,7 @@ def generate_html_preview(meet, favorites):
             }}
 
             .heat-table .fav-time {{
-                text-align: right;
+                text-align: right; !important
             }}
 
         </style>
