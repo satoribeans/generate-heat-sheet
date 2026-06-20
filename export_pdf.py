@@ -72,7 +72,7 @@ def generate_pdf(meet_title, events, favorites):
     pdf.set_font("DejaVu", "B", 14)
     pdf.cell(0, 8, "Favorite Swimmers", ln=1)
 
-    pdf.set_font("Helvetica", "", 10)
+    pdf.set_font("DejaVu", "", 10)
 
     for event in events:
         for heat in event.heats:
