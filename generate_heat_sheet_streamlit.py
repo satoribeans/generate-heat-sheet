@@ -89,23 +89,46 @@ st.session_state["favorites"] = favorites
 
 generate = st.button("Generate Heat Sheet")
 
+# -------------------------
+# GENERATE ONLY ON CLICK
+# -------------------------
 if generate and "meet" in st.session_state:
+
     meet = st.session_state["meet"]
     meet_title = st.session_state["meet_title"]
 
-    heat_sheet = build_heat_sheet(meet)
+    meet = build_heat_sheet(meet)
+    st.session_state["meet"] = meet
 
-    st.session_state["heat_sheet"] = heat_sheet
+    favorites = set(st.session_state.get("favorites", []))
 
-    html = generate_html_preview(meet.name, heat_sheet, set(st.session_state["favorites"]))
+    html = generate_html_preview(meet.name, meet.events, favorites)
+    pdf = generate_pdf(meet_title, meet.events, favorites)
 
-    pdf = generate_pdf(meet_title, heat_sheet, set(st.session_state["favorites"]))
-
-    st.download_button("Download HTML", html)
-    st.download_button("Download PDF", pdf, file_name="heat.pdf")
-
-    st.components.v1.html(html, height=800, scrolling=True)
-
-    st.session_state["heat_sheet"] = heat_sheet
     st.session_state["html"] = html
     st.session_state["pdf"] = pdf
+
+# -------------------------
+# ALWAYS RENDER OUTPUT (KEY FIX)
+# -------------------------
+
+if "html" in st.session_state:
+
+    st.download_button(
+        "Download HTML",
+        st.session_state["html"],
+        key="download_html"
+    )
+
+    st.download_button(
+        "Download PDF",
+        st.session_state["pdf"],
+        file_name="heat.pdf",
+        key="download_pdf"
+    )
+
+    st.components.v1.html(
+        st.session_state["html"],
+        height=800,
+        scrolling=True
+    )
