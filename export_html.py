@@ -19,11 +19,11 @@ def favorite_swimmers_html(favorites):
         for entry in entries:
             html.append(f"""
             <tr>
-                <td text-align: center;>{entry.event.event_number}</td>
-                <td text-align: left;>{entry.event.name}</td>
-                <td text-align: center;>{entry.heat_number}</td>
-                <td text-align: center;>{entry.lane_number}</td>
-                <td text-align: right;>{entry.entry_time}</td>
+                <td>{entry.event.event_number}</td>
+                <td>{entry.event.name}</td>
+                <td>{entry.heat_number}</td>
+                <td class="fav">{entry.lane_number}</td>
+                <td>{entry.entry_time}</td>
             </tr>
             """)
         html.append("</table>")
@@ -191,6 +191,11 @@ def generate_html_preview(meet, favorites):
             .heat-table th:nth-child(5),
             .heat-table td:nth-child(5) {{
                 width: 100px;
+                text-align: center;
+            }}
+
+            .heat-table .fav,
+            .heat-table .fav {{
                 text-align: center;
             }}
 
