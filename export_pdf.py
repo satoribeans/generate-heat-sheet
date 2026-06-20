@@ -6,7 +6,7 @@ class PDF(FPDF):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.add_font("DejaVu", "", "fonts/DejaVuSans.ttf", uni=True)
-        self.add_font("DejaVu", "B", "fonts/DejaVuSans-Bold.ttf", uni=True)
+        self.add_font("DejaVu", "B", "fonts/DejaVuSansCondensed-Bold.ttf", uni=True)
 
     def header(self):
         self.set_font("DejaVu", "B", 12)
