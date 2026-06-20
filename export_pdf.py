@@ -19,12 +19,12 @@ class PDF(FPDF):
         self.cell(0, 8, 
                   "For entertainment only — generated from the psych sheet; not an official meet document. Good luck swimmers!", 
                   ln=1, align="C")
-        # self.page_no() fetches the current page number
-        # '{nb}' acts as a placeholder for the total page count
-        page_text = f"Page {self.page_no()}/{{nb}}"
+        # # self.page_no() fetches the current page number
+        # # '{nb}' acts as a placeholder for the total page count
+        # page_text = f"Page {self.page_no()}/{{nb}}"
         
-        # Print the page number centered on the page
-        self.cell(0, 10, page_text, align="R")
+        # # Print the page number centered on the page
+        # self.cell(0, 10, page_text, align="R")
         self.ln(2)
 
     def print_event_header(self, event, x, y, width):
