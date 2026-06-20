@@ -1,12 +1,13 @@
 from html import escape
 
 
-def generate_html_preview(meet_title, heat_sheet, favorites):
+def generate_html_preview(meet_title, events, favorites):
 
     rows = []
+    fav_rows = []
 
-    total_events = len(heat_sheet)
-    total_heats = sum(len(event["heats"]) for event in heat_sheet)
+    total_events = len(events)
+    total_heats = sum(len(event.heats) for event in events)
 
     rows.append(f"<h1>{escape(meet_title)}</h1>")
     rows.append(
@@ -14,14 +15,38 @@ def generate_html_preview(meet_title, heat_sheet, favorites):
         f"<strong>{total_heats}</strong> heats</p>"
     )
 
-    for event in heat_sheet:
+    for event in events:
+        for heat in event.heats:
+            for lane in heat.lanes:
 
-        rows.append(
-            f"<h2>Event {event['event_number']}: "
-            f"{escape(event['event_name'])}</h2>"
+                entry = lane.entry
+                if not entry:
+                    continue
+
+                swimmer = entry.swimmer
+                if swimmer.name in favorites:
+                    fav_rows.append(
+                        f"<li>"
+                        f"Event {event.event_number} "
+                        f"Heat {heat.heat_number} "
+                        f"Lane {lane.lane_number} - "
+                        f"{escape(swimmer.name)} ({entry.entry_time})"
+                        f"</li>"
+                    )
+    if fav_rows:
+        rows.insert(
+            2,
+            "<h2>⭐ Favorite Swimmers</h2><ul>" + "".join(fav_rows) + "</ul>"
         )
 
-        for heat in event["heats"]:
+    for event in events:
+
+        rows.append(
+            f"<h2>Event {event.event_number}: "
+            f"{escape(event.name)}</h2>"
+        )
+
+        for heat in event.heats:
 
             rows.append(
                 f"<h3>Heat {heat.heat_number}</h3>"
