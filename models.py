@@ -181,4 +181,3 @@ class Meet:
             entries.sort(key=lambda e: e.event.event_number)
 
         return dict(result)
-
