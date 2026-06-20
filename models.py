@@ -164,7 +164,10 @@ class Meet:
 
     def all_entries(self):
         for event in self.events:
-            yield from event.entries
+            for heat in event.heats:
+                for lane in heat.lanes:
+                    if lane.entry:
+                        yield lane.entry
 
     def all_swimmers(self):
         return {e.swimmer for e in self.all_entries()}
