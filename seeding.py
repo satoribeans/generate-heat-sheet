@@ -1,5 +1,7 @@
 from models import Heat, Lane, Meet
 from utils import time_to_seconds, is_long_event
+from collections import defaultdict
+
 
 
 # -----------------------------
@@ -107,3 +109,29 @@ def build_heat_sheet(meet) -> Meet:
         event.heats = heats
 
     return meet
+
+
+def get_favorite_swimmers(
+    meet: Meet,
+    favorites: set[str]
+):
+
+    result = defaultdict(list)
+
+    for entry in meet.all_entries():
+
+        if entry.swimmer.name not in favorites:
+            continue
+
+        result[entry.swimmer.name].append({
+            "event_number": entry.event.event_number,
+            "event_name": entry.event.name,
+            "heat": entry.heat_number,
+            "lane": entry.lane_number,
+            "entry": entry,
+        })
+
+    for swims in result.values():
+        swims.sort(key=lambda x: x["event_number"])
+
+    return dict(result)
