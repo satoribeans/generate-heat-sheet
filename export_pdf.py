@@ -1,5 +1,5 @@
 from fpdf import FPDF
-import streamlit as st
+from utils import safe_text
 
 
 class PDF(FPDF):
@@ -7,6 +7,11 @@ class PDF(FPDF):
         super().__init__(*args, **kwargs)
         self.add_font("DejaVu", "", "fonts/DejaVuSans.ttf", uni=True)
         self.add_font("DejaVu", "B", "fonts/DejaVuSans-Bold.ttf", uni=True)
+
+    def header(self):
+        self.set_font("DejaVu", "B", 12)
+        self.cell(0, 8, self.title, ln=1, align="C")
+        self.ln(2)
 
     def header(self):
         self.set_font("DejaVu", "B", 12)
@@ -53,7 +58,7 @@ class PDF(FPDF):
             self.cell(20, 5, entry.entry_time, 0, 1, "R")
         return self.get_y()
 
-def generate_pdf(meet_title, events, favorites):
+def generate_pdf(meet, favorites_entries):
 
     pdf = PDF(
         orientation="P",
@@ -61,7 +66,7 @@ def generate_pdf(meet_title, events, favorites):
         format="Letter"
     )
 
-    pdf.title = meet_title
+    pdf.title = meet.name
     # pdf.set_auto_page_break(False)
 
     # --------------------------------------------------
@@ -71,28 +76,34 @@ def generate_pdf(meet_title, events, favorites):
 
     pdf.set_font("DejaVu", "B", 14)
     pdf.cell(0, 8, "Favorite Swimmers", ln=1)
-
     pdf.set_font("DejaVu", "", 10)
 
-    for event in events:
-        for heat in event.heats:
-            for lane in heat.lanes:
+    # # ------------------------------------------
+    # Render grouped output
+    # ------------------------------------------
+    for swimmer_name, entries in favorites_entries.items(): # grouped.items():
 
-                entry = lane.entry
-                if not entry:
-                    continue
+        # Swimmer header
+        pdf.set_font("DejaVu", "B", 11)
+        pdf.cell(0, 6, safe_text(swimmer_name), ln=1)
 
-                if entry.swimmer.name in favorites:
-                    pdf.cell(
-                        0,
-                        5,
-                        f"Event {event.event_number} "
-                        f"Heat {heat.heat_number} "
-                        f"Lane {lane.lane_number} - "
-                        f"{entry.swimmer.name} "
-                        f"({entry.entry_time})",
-                        ln=1
-                    )
+        # Table header
+        pdf.set_font("DejaVu", "B", 10)
+        pdf.cell(50, 6, "", 0, 0)
+        pdf.cell(15, 6, "Event", 1, 0)
+        pdf.cell(80, 6, "Event Name", 1, 0)
+        pdf.cell(15, 6, "Heat", 1, 0)
+        pdf.cell(15, 6, "Lane", 1, 0)
+        pdf.cell(20, 6, "Time", 1, 1)
+        # Rows under swimmer
+        for entry in entries:
+            pdf.cell(50, 6, "", 0, 0)  # indent
+            pdf.cell(15, 6, str(entry.event.event_number), 1, 0)
+            pdf.cell(80, 6, safe_text(entry.swimmer.name[:30]), 1, 0)
+            pdf.cell(15, 6, str(entry.heat_number), 1, 0)
+            pdf.cell(15, 6, str(entry.lane_number), 1, 0)
+            pdf.cell(20, 6, entry.entry_time, 1, 1)
+        pdf.ln(2)
 
     # --------------------------------------------------
     # HEAT SHEET
@@ -132,7 +143,7 @@ def generate_pdf(meet_title, events, favorites):
         # Heat title + lane rows + spacing
         return 5 + lane_count * 5 + HEAT_SPACING
 
-    for event in events:
+    for event in meet.events:
         # --------------------------------------------------
         # EVENT HEADER
         # --------------------------------------------------
