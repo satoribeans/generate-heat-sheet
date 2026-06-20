@@ -1,45 +1,58 @@
 from html import escape
 
+def favorite_swimmers_html(favorites):
+    html = []
 
-def generate_html_preview(meet_title, events, favorites):
+    for swimmer_name, entries in favorites.items():
+        html.append(f"<h3>{swimmer_name}</h3>")
+        html.append("""
+        <table class="heat-table">
+        <tr>
+            <th>Event</th>
+            <th>Event Name</th>
+            <th>Heat</th>
+            <th>Lane</th>
+            <th>Time</th>
+        </tr>
+        """)
+
+        for entry in entries:
+            html.append(f"""
+            <tr>
+                <td>{entry.event.event_number}</td>
+                <td>{entry.event.name}</td>
+                <td>{entry.heat_number}</td>
+                <td>{entry.lane_number}</td>
+                <td>{entry.entry_time}</td>
+            </tr>
+            """)
+        html.append("</table>")
+    return "".join(html)
+
+def generate_html_preview(meet, favorites):
+    favorite_entries = meet.favorite_entries(favorites)
 
     rows = []
-    fav_rows = []
 
-    total_events = len(events)
-    total_heats = sum(len(event.heats) for event in events)
+    total_events = len(meet.events)
+    total_heats = sum(len(event.heats) for event in meet.events)
 
-    rows.append(f"<h1>{escape(meet_title)}</h1>")
+    rows.append(f"<h1>{escape(meet.name)}</h1>")
     rows.append(
         f"<p><strong>{total_events}</strong> events, "
         f"<strong>{total_heats}</strong> heats</p>"
     )
 
-    for event in events:
-        for heat in event.heats:
-            for lane in heat.lanes:
-
-                entry = lane.entry
-                if not entry:
-                    continue
-
-                swimmer = entry.swimmer
-                if swimmer.name in favorites:
-                    fav_rows.append(
-                        f"<li>"
-                        f"Event {event.event_number} "
-                        f"Heat {heat.heat_number} "
-                        f"Lane {lane.lane_number} - "
-                        f"{escape(swimmer.name)} ({entry.entry_time})"
-                        f"</li>"
-                    )
-    if fav_rows:
-        rows.insert(
-            2,
-            "<h2>⭐ Favorite Swimmers</h2><ul>" + "".join(fav_rows) + "</ul>"
+    # ==================
+    # Favorite Swimmers
+    # ==================
+    if favorite_entries:
+        rows.append("<h2>⭐ Favorite Swimmers</h2>")
+        rows.append(
+            favorite_swimmers_html(favorite_entries)
         )
 
-    for event in events:
+    for event in meet.events:
 
         rows.append(
             f"<h2>Event {event.event_number}: "
@@ -75,7 +88,7 @@ def generate_html_preview(meet_title, events, favorites):
                 entry = lane.entry
                 swimmer = entry.swimmer
 
-                is_favorite = swimmer.name in favorites
+                is_favorite = swimmer.name in favorite_entries
 
                 name = escape(swimmer.name)
                 team = escape(swimmer.team)
