@@ -1,7 +1,4 @@
-import string
-import streamlit as st
-
-from models import Heat, Lane
+from models import Heat, Lane, Meet
 from utils import time_to_seconds, is_long_event
 
 
@@ -92,9 +89,7 @@ def seed_event(entries, lane_count=8):
 # -----------------------------
 # Main entry point
 # -----------------------------
-def build_heat_sheet(meet):
-    heat_sheet = []
-
+def build_heat_sheet(meet) -> Meet:
     lanes = meet.settings.lanes
     order = meet.settings.distance_event_order
 
@@ -106,12 +101,9 @@ def build_heat_sheet(meet):
         if "mixed" in event.name.lower():
             entries = sort_entries(entries, order)
 
+        # generate heats, return list[Heat]
         heats = seed_event(entries, lanes)
+        # attach to event model
+        event.heats = heats
 
-        heat_sheet.append({
-            "event_number": event.event_number,
-            "event_name": event.name,
-            "heats": heats
-        })
-
-    return heat_sheet
+    return meet
