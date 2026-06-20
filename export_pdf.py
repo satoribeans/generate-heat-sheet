@@ -16,7 +16,9 @@ class PDF(FPDF):
     def footer(self):
         self.set_y(-15)  # <-- this is the key
         self.set_font("DejaVu", "B", 8)
-        self.cell(0, 8, "Good luck swimmers — swim fast, and have fun!!!", ln=1, align="C")
+        self.cell(0, 8, 
+                  "For planning only — generated from the psych sheet; not an official meet document. Good luck swimmers!", 
+                  ln=1, align="C")
         self.ln(2)
 
     def print_event_header(self, event, x, y, width):
