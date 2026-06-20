@@ -17,7 +17,7 @@ class PDF(FPDF):
         self.set_y(-15)  # <-- this is the key
         self.set_font("DejaVu", "B", 8)
         self.cell(0, 8, 
-                  "For planning only — generated from the psych sheet; not an official meet document. Good luck swimmers!", 
+                  "For entertainment only — generated from the psych sheet; not an official meet document. Good luck swimmers!", 
                   ln=1, align="C")
         self.ln(2)
 
