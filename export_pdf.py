@@ -47,7 +47,7 @@ class PDF(FPDF):
             swimmer = entry.swimmer
             self.set_x(x)
             self.cell(5, 5, str(lane.lane_number), 0, 0, "C")
-            self.cell(40, 5, entry.event.name, 0, 0, "L")
+            self.cell(40, 5, swimmer.name[:22], 0, 0, "L")
             self.cell(10, 5, str(swimmer.age), 0, 0, "C")
             self.cell(15, 5, swimmer.team[:8], 0, 0, "L")
             self.cell(20, 5, entry.entry_time, 0, 1, "R")
@@ -94,7 +94,7 @@ def generate_pdf(meet, favorites_entries):
         for entry in entries:
             pdf.cell(50, 6, "", 0, 0)  # indent
             pdf.cell(15, 6, str(entry.event.event_number), 1, 0)
-            pdf.cell(80, 6, safe_text(entry.swimmer.name[:30]), 1, 0)
+            pdf.cell(80, 6, entry.event.name, 1, 0)
             pdf.cell(15, 6, str(entry.heat_number), 1, 0)
             pdf.cell(15, 6, str(entry.lane_number), 1, 0)
             pdf.cell(20, 6, entry.entry_time, 1, 1)
