@@ -16,15 +16,11 @@ class PDF(FPDF):
     def footer(self):
         self.set_y(-15)  # <-- this is the key
         self.set_font("DejaVu", "B", 8)
-        self.cell(0, 8, 
-                  "For entertainment only — generated from the psych sheet; not an official meet document. Good luck swimmers!", 
-                  ln=1, align="C")
-        # # self.page_no() fetches the current page number
-        # # '{nb}' acts as a placeholder for the total page count
-        # page_text = f"Page {self.page_no()}/{{nb}}"
-        
-        # # Print the page number centered on the page
-        # self.cell(0, 10, page_text, align="R")
+        footer_text = (
+            f"For entertainment only — generated from the psych sheet; not an official meet document. Good luck swimmers!       "
+            f"Page {self.page_no()} of {{nb}}"
+        )
+        self.cell(0, 8, footer_text, ln=1, align="C")
         self.ln(2)
 
     def print_event_header(self, event, x, y, width):
@@ -75,6 +71,7 @@ def generate_pdf(meet, favorites_entries):
         format="Letter"
     )
 
+    pdf.alias_nb_pages()  # enables {nb} replacement
     pdf.title = meet.name
 
     # --------------------------------------------------
