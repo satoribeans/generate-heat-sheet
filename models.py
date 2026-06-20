@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 from functools import cached_property
-from typing import List, Optional
+from typing import Dict, Optional
 from dataclasses import dataclass, field
+from collections import defaultdict
 
 
 # ----------------------------------------
@@ -168,4 +169,16 @@ class Meet:
 
     def all_swimmers(self):
         return {e.swimmer for e in self.all_entries()}
+
+    def favorite_entries(self, favorites: set[str]) -> dict[str, list[Entry]]:
+        result = defaultdict(list)
+
+        for entry in self.all_entries():
+            if entry.swimmer.name in favorites:
+                result[entry.swimmer.name].append(entry)
+
+        for entries in result.values():
+            entries.sort(key=lambda e: e.event.event_number)
+
+        return dict(result)
 
