@@ -94,11 +94,11 @@ def generate_pdf(meet, favorites_entries):
         pdf.set_font("DejaVu", "B", 9)
         for entry in entries:
             pdf.cell(20, 6, "", 0, 0)  # indent
-            pdf.cell(15, 6, str(entry.event.event_number), 1, 0)
-            pdf.cell(100, 6, entry.event.name, 1, 0)
-            pdf.cell(15, 6, str(entry.heat_number), 1, 0)
-            pdf.cell(15, 6, str(entry.lane_number), 1, 0)
-            pdf.cell(20, 6, entry.entry_time, 1, 1)
+            pdf.cell(15, 6, str(entry.event.event_number), 1, 0, "C")
+            pdf.cell(100, 6, entry.event.name, 1, 0, "L")
+            pdf.cell(15, 6, str(entry.heat_number), 1, 0, "C")
+            pdf.cell(15, 6, str(entry.lane_number), 1, 0, "C")
+            pdf.cell(20, 6, entry.entry_time, 1, 1, "R")
         pdf.ln(2)
 
     # --------------------------------------------------
