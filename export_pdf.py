@@ -13,6 +13,12 @@ class PDF(FPDF):
         self.cell(0, 8, self.title, ln=1, align="C")
         self.ln(2)
 
+    def footer(self):
+        self.set_y(-15)  # <-- this is the key
+        self.set_font("DejaVu", "B", 8)
+        self.cell(0, 8, "Good luck swimmers — swim fast, and have fun!!!", ln=1, align="C")
+        self.ln(2)
+
     def print_event_header(self, event, x, y, width):
         self.set_xy(x, y)
 
@@ -62,7 +68,6 @@ def generate_pdf(meet, favorites_entries):
     )
 
     pdf.title = meet.name
-    # pdf.set_auto_page_break(False)
 
     # --------------------------------------------------
     # FAVORITES PAGE
@@ -84,12 +89,12 @@ def generate_pdf(meet, favorites_entries):
 
         # Table header
         pdf.set_font("DejaVu", "B", 10)
-        pdf.cell(20, 6, "", 0, 0)
-        pdf.cell(15, 6, "Event", 1, 0)
-        pdf.cell(100, 6, "Event Name", 1, 0)
-        pdf.cell(15, 6, "Heat", 1, 0)
-        pdf.cell(15, 6, "Lane", 1, 0)
-        pdf.cell(20, 6, "Time", 1, 1)
+        pdf.cell(20, 6, "", 0, 0)  # indent
+        pdf.cell(15, 6, "Event", 1, 0, "C")
+        pdf.cell(100, 6, "Event Name", 1, 0, "C")
+        pdf.cell(15, 6, "Heat", 1, 0,"C")
+        pdf.cell(15, 6, "Lane", 1, 0, "C")
+        pdf.cell(20, 6, "Time", 1, 1, "C")
         # Rows under swimmer
         pdf.set_font("DejaVu", "B", 9)
         for entry in entries:
