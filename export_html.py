@@ -23,7 +23,7 @@ def favorite_swimmers_html(favorites):
                 <td>{entry.event.name}</td>
                 <td>{entry.heat_number}</td>
                 <td class="fav">{entry.lane_number}</td>
-                <td>{entry.entry_time}</td>
+                <td class="fav-time">{entry.entry_time}</td>
             </tr>
             """)
         html.append("</table>")
@@ -194,9 +194,12 @@ def generate_html_preview(meet, favorites):
                 text-align: center;
             }}
 
-            .heat-table .fav,
             .heat-table .fav {{
                 text-align: center;
+            }}
+
+            .heat-table .fav-time {{
+                text-align: right;
             }}
 
         </style>
