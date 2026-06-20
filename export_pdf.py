@@ -77,7 +77,7 @@ def generate_pdf(meet, favorites_entries):
     pdf.add_page()
 
     pdf.set_font("DejaVu", "B", 14)
-    pdf.cell(0, 8, "Favorite Swimmers", ln=1)
+    pdf.cell(0, 10, "Favorite Swimmers", ln=2)
     pdf.set_font("DejaVu", "", 10)
 
     # # ------------------------------------------
