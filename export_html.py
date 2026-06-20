@@ -19,11 +19,11 @@ def favorite_swimmers_html(favorites):
         for entry in entries:
             html.append(f"""
             <tr>
-                <td>{entry.event.event_number}</td>
-                <td>{entry.event.name}</td>
-                <td>{entry.heat_number}</td>
-                <td>{entry.lane_number}</td>
-                <td>{entry.entry_time}</td>
+                <td text-align: center;>{entry.event.event_number}</td>
+                <td text-align: left;>{entry.event.name}</td>
+                <td text-align: center;>{entry.heat_number}</td>
+                <td text-align: center;>{entry.lane_number}</td>
+                <td text-align: right;>{entry.entry_time}</td>
             </tr>
             """)
         html.append("</table>")
