@@ -46,7 +46,13 @@ st.sidebar.caption(
     "All other events use standard seeding."
 )
 
-uploaded = st.file_uploader("Upload PDF", type=["pdf"])
+col1, col2 = st.columns([1, 4])
+with col1:
+    st.markdown("**Upload PDF**")
+    st.caption("Upload your psych sheet")   # optional subtitle
+
+with col2:
+    uploaded = st.file_uploader("", type=["pdf"], label_visibility="collapsed")
 
 if "all_names" not in st.session_state:
     st.session_state["all_names"] = []
@@ -80,11 +86,15 @@ if uploaded and "meet" not in st.session_state:
     )
 
 # Always visible
-favorites = st.multiselect(
-    "Favorites",
-    st.session_state["all_names"],
-    default=st.session_state.get("favorites", [])
-)
+col1, col2 = st.columns([1, 4])
+with col1:
+    st.markdown("**Favorites**")
+    st.caption("Select favorite swimmers")
+
+with col2:
+    favorites = st.multiselect(
+        "", st.session_state["all_names"],
+        default=st.session_state.get("favorites", []))
 st.session_state["favorites"] = favorites
 
 generate = st.button("Generate Heat Sheet")
@@ -101,9 +111,13 @@ if generate and "meet" in st.session_state:
     st.session_state["meet"] = meet
 
     favorites = set(st.session_state.get("favorites", []))
+    favorite_entries = meet.favorite_entries(favorites)
 
-    html = generate_html_preview(meet.name, meet.events, favorites)
-    pdf = generate_pdf(meet_title, meet.events, favorites)
+    html = generate_html_preview(meet, favorites)
+    pdf = generate_pdf(meet, favorite_entries)
+
+    # html = generate_html_preview(meet.name, meet.events, favorites)
+    # pdf = generate_pdf(meet_title, meet.events, favorites)
 
     st.session_state["html"] = html
     st.session_state["pdf"] = pdf
