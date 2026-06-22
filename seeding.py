@@ -119,3 +119,155 @@ def get_favorite_swimmers(
         swims.sort(key=lambda x: x["event_number"])
 
     return dict(result)
+
+#=============================================
+# Future work - alternative seeding methods 1
+#=============================================
+def seed_event_fastest_in_center(entries, lane_count=8, reverse_heats=True):
+    if not entries:
+        return []
+
+    # Center-out lane order (fastest gets center lane)
+    lane_order = (
+        [4, 5, 3, 6, 2, 7, 1, 8]        # 8-lane pool
+        if lane_count == 8
+        else [5, 6, 4, 7, 3, 8, 2, 9, 1, 10]  # 10-lane pool
+    )
+
+    num_heats = (len(entries) + lane_count - 1) // lane_count
+
+    heats_entries = []
+    remaining = list(entries)  # already sorted fastest → slowest
+
+    # ── Step 1: Split entries into heats ──────────────────────
+    # Build from fastest heat down to slowest.
+    # Avoid leaving a heat-1 with 0 swimmers.
+    for h in range(num_heats, 0, -1):
+        count = min(lane_count, len(remaining))
+
+        # If taking `count` would leave heat #1 empty, hold one back
+        if h > 1 and len(remaining) - count < 1 and len(remaining) > 1:
+            count = len(remaining) - 1
+
+        heats_entries.append(remaining[:count])
+        remaining = remaining[count:]
+
+    # heats_entries[0] = fastest heat, [-1] = slowest heat
+    if reverse_heats:
+        heats_entries.reverse()
+    # Now heats_entries[0] = slowest (Heat 1), [-1] = fastest (last heat)
+
+    # ── Step 2: Assign lanes using circle seeding ─────────────
+    #
+    # Circle seeding rule:
+    #   Within each heat, fastest swimmer gets center lane (lane_order[0]),
+    #   next fastest gets lane_order[1], and so on outward.
+    #
+    # Cross-heat circle seeding (USA Swimming standard):
+    #   The single fastest swimmer in the meet goes in center lane
+    #   of the LAST heat. The 2nd fastest goes in center lane of
+    #   the 2nd-to-last heat. Then we fill remaining lanes outward
+    #   alternating across heats.
+    #
+    #   Seeding order across heats (for an 8-lane, 3-heat example):
+    #     Seed 1  → Heat 3, Lane 4  (center, fastest heat)
+    #     Seed 2  → Heat 2, Lane 4  (center, 2nd heat)
+    #     Seed 3  → Heat 1, Lane 4  (center, slowest heat)
+    #     Seed 4  → Heat 3, Lane 5  (1 right of center, fastest heat)
+    #     Seed 5  → Heat 2, Lane 5
+    #     Seed 6  → Heat 1, Lane 5
+    #     Seed 7  → Heat 3, Lane 3  (1 left of center)
+    #     ... and so on
+
+    final_heats = []
+    for heat_idx, heat_entries in enumerate(heats_entries):
+        # Sort this heat's entries fastest first for lane assignment
+        # (entries are already sorted but just to be explicit)
+        sorted_entries = sorted(heat_entries, key=lambda e: e.seed_num)
+
+        lanes = {}
+        for rank, entry in enumerate(sorted_entries):
+            if rank < len(lane_order):
+                lane_num = lane_order[rank]
+                lanes[lane_num] = entry
+
+        final_heats.append({
+            "heat_number": heat_idx + 1,
+            "lanes": lanes,
+        })
+
+    return final_heats
+
+#=============================================
+# Future work - alternative seeding methods 2
+#=============================================
+def seed_event_cross_heat(entries, lane_count=8, reverse_heats=True):
+    if not entries:
+        return []
+
+    lane_order = (
+        [4, 5, 3, 6, 2, 7, 1, 8]
+        if lane_count == 8
+        else [5, 6, 4, 7, 3, 8, 2, 9, 1, 10]
+    )
+
+    num_heats = (len(entries) + lane_count - 1) // lane_count
+
+    # ── Step 1: Split into heats (fastest first) ──────────────
+    remaining = list(entries)
+    heats_entries = []
+
+    for h in range(num_heats, 0, -1):
+        count = min(lane_count, len(remaining))
+        if h > 1 and len(remaining) - count < 1 and len(remaining) > 1:
+            count = len(remaining) - 1
+        heats_entries.append(remaining[:count])
+        remaining = remaining[count:]
+
+    if reverse_heats:
+        heats_entries.reverse()
+    # heats_entries[0]=Heat1(slowest) ... [-1]=last heat(fastest)
+
+    # ── Step 2: True circle seeding across heats ──────────────
+    #
+    # Build a seeding grid: for each lane position (center outward),
+    # assign entries top-down through heats from fastest to slowest.
+    #
+    # Example — 3 heats, 8 lanes, 20 swimmers:
+    #
+    #   Lane pos:  [4]  [5]  [3]  [6]  [2]  [7]  [1]  [8]
+    #   Heat 3:     1    4    7   10   13   16   19    -
+    #   Heat 2:     2    5    8   11   14   17   20    -
+    #   Heat 1:     3    6    9   12   15   18    -    -
+    #
+    # Seed numbers fill down each column before moving to next lane.
+
+    # Initialize empty lane assignments for each heat
+    heat_lanes = [{} for _ in range(num_heats)]
+
+    # Flatten entries in seeding order:
+    # fastest heat first within each lane position
+    seed_idx = 0
+    all_entries = list(entries)  # fastest → slowest (seed 1 first)
+
+    for lane_pos in lane_order:
+        # Fill this lane top-down: fastest heat → slowest heat
+        for heat_idx in range(num_heats - 1, -1, -1):
+            if seed_idx >= len(all_entries):
+                break
+            # Only assign if this heat has a swimmer at this position
+            if seed_idx < len(heats_entries[heat_idx]) + sum(
+                len(heats_entries[i]) for i in range(heat_idx)
+            ):
+                heat_lanes[heat_idx][lane_pos] = all_entries[seed_idx]
+                seed_idx += 1
+
+    # ── Step 3: Build final heat objects ──────────────────────
+    final_heats = []
+    for heat_idx, lanes in enumerate(heat_lanes):
+        final_heats.append({
+            "heat_number": heat_idx + 1,
+            "lanes": lanes,
+        })
+
+    return final_heats
