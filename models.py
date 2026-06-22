@@ -68,7 +68,7 @@ from collections import defaultdict
 class MeetSettings:
     lanes: int = 8
     circle_seed_top_n_heats: int = 1
-    distance_event_order: str = "Fast to Slow"  # or "Slow to Fast"
+    distance_event_order: str = "fast_to_slow"  # or "slow_to_fast"
     long_distance_events: set[int] = field(
         default_factory=set
     )
