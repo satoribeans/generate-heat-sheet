@@ -104,7 +104,7 @@ if generate and "meet" in st.session_state:
     # getting the current meet settings
     settings = MeetSettings(
         lanes=lanes,
-        circle_seed_top_n_heats=circle_seed_top_n_heats,
+        circle_seed_top_n_heats=1, # default to 1
         distance_event_order=distance_event_order
     )
     meet.settings = settings
