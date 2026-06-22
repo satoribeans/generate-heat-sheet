@@ -22,13 +22,14 @@ lanes = st.sidebar.selectbox(
     index=0
 )
 
-circle_seed_top_n_heats = st.sidebar.number_input(
-    "Circle Seed Top N Heats",
-    min_value=1,
-    max_value=10,
-    value=1,
-    step=1
-)
+# disable for now
+# circle_seed_top_n_heats = st.sidebar.number_input(
+#     "Circle Seed Top N Heats",
+#     min_value=1,
+#     max_value=10,
+#     value=1,
+#     step=1
+# )
 
 distance_event_order = st.sidebar.selectbox(
     "Long Distance Event Heat Order",
