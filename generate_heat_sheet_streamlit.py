@@ -68,16 +68,9 @@ if uploaded and "meet" not in st.session_state:
     meet_title = extract_meet_title(text)
     events = parse_psych_sheet(text)
 
-    settings = MeetSettings(
-        lanes=lanes,
-        circle_seed_top_n_heats=circle_seed_top_n_heats,
-        distance_event_order=distance_event_order
-    )
-
     meet = Meet(
         name=meet_title,
         events=events,
-        settings=settings,
     )
     st.session_state["meet"] = meet
     st.session_state["meet_title"] = meet_title
@@ -107,6 +100,15 @@ if generate and "meet" in st.session_state:
     meet = st.session_state["meet"]
     meet_title = st.session_state["meet_title"]
 
+    # getting the current meet settings
+    settings = MeetSettings(
+        lanes=lanes,
+        circle_seed_top_n_heats=circle_seed_top_n_heats,
+        distance_event_order=distance_event_order
+    )
+    meet.settings = settings
+
+    # Generate heat sheet and update session state
     meet = build_heat_sheet(meet)
     st.session_state["meet"] = meet
 
@@ -115,9 +117,6 @@ if generate and "meet" in st.session_state:
 
     html = generate_html_preview(meet, favorites)
     pdf = generate_pdf(meet, favorite_entries)
-
-    # html = generate_html_preview(meet.name, meet.events, favorites)
-    # pdf = generate_pdf(meet_title, meet.events, favorites)
 
     st.session_state["html"] = html
     st.session_state["pdf"] = pdf
