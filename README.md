@@ -6,24 +6,21 @@ A user-friendly web app to convert swim meet psych sheets into organized, search
 
 ## Features
 
-- **📤 Easy Upload**: Simply upload a psych sheet PDF
-- **🔍 Smart Parsing**: Automatically extracts events, swimmer info, and seed times
-- **⭐ Favorites Tracking**: Mark favorite swimmers to quickly find their heats, events, and lanes
-- **📄 Multiple Exports**: Download as JSON for data analysis or PDF for printing
-- **🎯 Optimal Seeding**: Applies standard swim meet seeding rules (fastest swimmers in later heats)
-- **📊 Clean Layout**: Two-column heat sheet format optimized for readability
+- 📤 Easy Upload: Upload a psych sheet PDF (text-based PDFs work best).
+- 🔍 Smart Parsing: Extracts events, swimmer info, ages, teams, and seed times from common psych-sheet layouts.
+- ⭐ Favorites Tracking: Mark favorite swimmers to quickly find their events, heats, and lanes.
+- 📄 Exports: Download a formatted PDF and an HTML preview. (JSON export is not implemented in this version.)
+- 🎯 Seeding: Applies circle-seeding rules so faster swimmers are placed in later heats and lane assignments follow standard meet ordering.
+- ⚙️ Configurable Settings: Choose lanes per heat (8 or 10), how many top heats are treated specially for circle seeding, and the ordering for long-distance events.
+- 📊 Clean Layout: Two-column heat sheet layout optimized for readability in the generated PDF.
 
 ## What You'll Get
 
 When you process a psych sheet, the app generates:
 
-1. **Favorite Swimmers Index** – A dedicated page showing where each marked swimmer competes
-2. **Meet Summary** – Total event count and your favorite swimmers list
-3. **Heat Sheets** – Full event details organized by heat, including:
-   - Event number and name
-   - Heat number
-   - Lane assignments
-   - Swimmer names, ages, teams, and seed times
+1. Favorite Swimmers Index — a dedicated page (PDF) showing the selected swimmers and where they swim.
+2. Embedded HTML preview — a full preview of the heat sheets in your browser (streamlit component).
+3. Heat Sheets (PDF) — full event details organized by heat, including event number, event name, heat number, lane assignments, swimmer names, ages, teams, and seed times.
 
 ## Getting Started
 
@@ -34,16 +31,18 @@ When you process a psych sheet, the app generates:
 
 ### Installation
 
-1. **Clone the repository**:
+1. Clone the repository:
    ```bash
    git clone https://github.com/satoribeans/generate-heat-sheet.git
    cd generate-heat-sheet
    ```
 
-2. **Install dependencies**:
+2. Install dependencies:
    ```bash
    pip install streamlit pypdf fpdf2
    ```
+
+3. Fonts: The PDF generator uses DejaVu Sans to support a wide range of characters. Ensure the `fonts/DejaVuSans.ttf` and `fonts/DejaVuSans-Bold.ttf` files are present in the repository's `fonts/` directory. If they are missing, install DejaVu fonts on your system or place those TTF files in `fonts/`.
 
 ### Running the App
 
@@ -55,81 +54,68 @@ The app will open in your default browser at `http://localhost:8501`.
 
 ## How to Use
 
-1. **Upload your psych sheet**: Click "Upload Psych Sheet PDF" and select your PDF file
-2. **Select favorite swimmers**: Use the multiselect dropdown to mark swimmers you want to track
-3. **Download your heat sheet**: 
-   - Download as **PDF** for printing or viewing
-   - Download as **JSON** for detailed data analysis
+1. Upload your psych sheet PDF using the upload control.
+2. Adjust meet settings in the sidebar:
+   - Lanes per Heat (8 or 10)
+   - Circle Seed Top N Heats (integer)
+   - Long Distance Event Heat Order (Fast to Slow / Slow to Fast)
+3. Select favorite swimmers from the multi-select dropdown.
+4. Click "Generate Heat Sheet". The app will:
+   - Parse the psych sheet text
+   - Build heats using the seeding logic
+   - Produce an HTML preview and a PDF (the PDF includes a favorites page first, then the heat sheets in a two-column layout)
+5. Download the generated HTML or PDF using the provided buttons. The HTML is also rendered inline for quick inspection.
 
 ## How It Works
 
 The app processes your psych sheet in four steps:
 
-1. **Text Extraction** – Reads all text from the PDF using `pypdf`
-2. **Data Parsing** – Identifies events, swimmers, ages, teams, and seed times from the raw text
-3. **Seeding Logic** – Organizes swimmers into heats following standard swim meet rules:
+1. Text extraction — reads text from the PDF using `pypdf`.
+2. Data parsing — identifies events, swimmers, ages, teams, and seed times from the raw text (`parser.py`).
+3. Seeding logic — organizes swimmers into heats following circle-seeding rules implemented in `seeding.py`:
    - Heat 1 contains the slowest swimmers
    - Final heats contain the fastest swimmers
-   - Lanes within each heat are ordered by seed time
-4. **Document Generation** – Creates a formatted PDF using `fpdf2`
+   - Lanes within each heat follow a typical pool lane order ([4,5,3,6,2,7,1,8] for 8 lanes, and a corresponding order for 10 lanes)
+   - Long-distance events can be seeded in either fast-to-slow or slow-to-fast order based on the sidebar setting
+4. Document generation — creates a formatted PDF using `fpdf2` and an HTML preview using `export_html.py`.
 
 ## Supported Psych Sheet Formats
 
-The parser recognizes multiple psych sheet layouts and handles common formatting variations:
-- Different delimiter patterns between swimmer data fields
-- Non-ASCII characters (smart character replacement)
-- Various age group and team designations
+The parser supports several common layouts exported by meet management tools. It handles common formatting variations and some non-ASCII characters via a small replacement map.
 
 ## Output Files
 
-### PDF Output
-- Meet title header
-- Favorites index page
-- Meet summary page
-- Multi-page heat sheets with two-column layout
-- Optimized for printing
+### PDF
+- Favorites index page (first page)
+- Multi-page heat sheets with a two-column layout
+- Uses DejaVu Sans fonts to support extended characters
 
-### JSON Output
-Structured data including:
-- Event numbers and names
-- Heat assignments
-- Swimmer information (name, age, team, seed time)
-- Lane assignments
+### HTML
+- Embeddable preview that shows the meet header, favorites section (if any), and the per-event heat tables
+
+Note: There is no JSON download implemented in the current codebase. The README previously mentioned JSON export — that is not available in this implementation.
 
 ## Tips for Success
 
-- **Quality PDFs work best**: Clear, text-based PDFs extract more accurately than scanned images
-- **Double-check information**: Always compare against the official meet heat sheet
-- **Use for preparation**: Great for pre-meet planning, travel logistics, and warm-up scheduling
-- **Multiple copies**: Generate and print multiple copies for family members
+- Use text-based PDFs (not scanned images) for best results.
+- Verify parsed seed times and names before relying on printed heat sheets.
+- If PDF generation fails because fonts are missing, ensure the required TTF files are in `fonts/` or install DejaVu on your system.
 
 ## Limitations
 
-- Works best with standard psych sheet formats
-- Scanned images or heavily formatted PDFs may require manual cleanup
-- Specialized or regional psych sheet formats may need custom parsing
+- Scanned images or heavily formatted PDFs may not parse correctly.
+- Specialized or regional psych sheet formats may require parser adjustments.
+- The app assumes the psych sheet contains extractable text via `pypdf`.
 
 ## Troubleshooting
 
-**"Swimmers not extracting correctly?"**
-- Check that your PDF is text-based (not scanned/image)
-- Try a different psych sheet format if available
-
-**"Heat assignments look wrong?"**
-- Verify the seed times were parsed correctly in the JSON output
-- Confirm your pool's lane count (default is 8)
-
-**"PDF not downloading?"**
-- Check your browser's download settings
-- Try a different browser
+- "Swimmers not extracting correctly?" — Check that the PDF is text-based and not an image scan.
+- "Heat assignments look wrong?" — Verify seed times were parsed correctly and check the 'Lanes per Heat' setting.
+- "PDF missing or rendering issues?" — Confirm the `fonts/` directory contains DejaVu Sans TTFs and that `fpdf2` is installed.
 
 ## Contributing
 
-Have improvements or found a bug? Feel free to open an issue or submit a pull request!
-
-## Disclaimer
-
-This tool is designed to help swimmers and families prepare for upcoming meets. It is **not** an official document. Always verify all information with the official meet heat sheet provided by meet organizers.
+Have improvements or found a bug? Open an issue or submit a pull request. Please include a sample psych sheet (with any private data redacted) if you're reporting a parsing bug.
 
 ## License
 
