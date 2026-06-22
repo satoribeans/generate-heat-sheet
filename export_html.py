@@ -6,7 +6,7 @@ def favorite_swimmers_html(favorites):
     for swimmer_name, entries in favorites.items():
         html.append(f"<h3>{swimmer_name}</h3>")
         html.append("""
-        <table class="heat-table">
+        <table class="fav-swimmer-table">
         <tr>
             <th>Event</th>
             <th>Event Name</th>
@@ -22,8 +22,8 @@ def favorite_swimmers_html(favorites):
                 <td>{entry.event.event_number}</td>
                 <td>{entry.event.name}</td>
                 <td>{entry.heat_number}</td>
-                <td class="fav">{entry.lane_number}</td>
-                <td class="fav-time">{entry.entry_time}</td>
+                <td>{entry.lane_number}</td>
+                <td>{entry.entry_time}</td>
             </tr>
             """)
         html.append("</table>")
@@ -139,7 +139,8 @@ def generate_html_preview(meet, favorites):
                 margin-bottom: 5px;
             }}
 
-            .heat-table {{
+            .heat-table,
+            .fav-swimmer-table{{
                 border-collapse: collapse;
                 table-layout: fixed;
                 width: 700px;
@@ -147,7 +148,9 @@ def generate_html_preview(meet, favorites):
             }}
 
             .heat-table th,
-            .heat-table td {{
+            .heat-table td,
+            .fav-swimmer-table th,
+            .fav-swimmer-table td {{
                 border: 1px solid #cccccc;
                 padding: 4px 6px;
                 overflow: hidden;
@@ -155,7 +158,8 @@ def generate_html_preview(meet, favorites):
                 white-space: nowrap;
             }}
 
-            .heat-table th {{
+            .heat-table th,
+            .fav-swimmer-table th {{
                 background: #f2f2f2;
             }}
 
@@ -194,12 +198,34 @@ def generate_html_preview(meet, favorites):
                 text-align: center;
             }}
 
-            .heat-table .fav {{
+            .fav-swimmer-table th:nth-child(1),
+            .fav-swimmer-table td:nth-child(1) {{
+                width: 50px;
+                text-align: center;
+            }}
+            
+            .fav-swimmer-table th:nth-child(2),
+            .fav-swimmer-table td:nth-child(2) {{
+                width: 350px;
+                text-align: left;
+            }}
+            
+            .fav-swimmer-table th:nth-child(3),
+            .fav-swimmer-table td:nth-child(3) {{
+                width: 50px;
+                text-align: center;
+            }}
+            
+            .fav-swimmer-table th:nth-child(4),
+            .fav-swimmer-table td:nth-child(4) {{
+                width: 50px;
                 text-align: center;
             }}
 
-            .heat-table .fav-time {{
-                text-align: right; !important
+            .fav-swimmer-table th:nth-child(5),
+            .fav-swimmer-table td:nth-child(5) {{
+                width: 100px;
+                text-align: right;
             }}
 
         </style>
