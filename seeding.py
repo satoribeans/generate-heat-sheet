@@ -100,7 +100,8 @@ def build_heat_sheet(meet) -> Meet:
         entries = event.entries
 
         # long/mixed event logic
-        if "mixed" in event.name.lower():
+        # if "mixed" in event.name.lower():
+        if is_long_event(event.name.lower()):
             entries = sort_entries(entries, order)
 
         # generate heats, return list[Heat]
