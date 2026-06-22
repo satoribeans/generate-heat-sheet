@@ -77,39 +77,39 @@ def generate_pdf(meet, favorites_entries):
     # --------------------------------------------------
     # FAVORITES PAGE
     # --------------------------------------------------
-    pdf.add_page()
-
-    pdf.set_font("DejaVu", "B", 14)
-    pdf.cell(0, 20, "Favorite Swimmers", ln=1)
-    pdf.set_font("DejaVu", "", 10)
-
-    # # ------------------------------------------
-    # Render grouped output
-    # ------------------------------------------
-    for swimmer_name, entries in favorites_entries.items(): # grouped.items():
-
-        # Swimmer header
-        pdf.set_font("DejaVu", "B", 11)
-        pdf.cell(0, 6, safe_text(swimmer_name), ln=1)
-
-        # Table header
-        pdf.set_font("DejaVu", "B", 10)
-        pdf.cell(20, 6, "", 0, 0)  # indent
-        pdf.cell(15, 6, "Event", 1, 0, "C")
-        pdf.cell(100, 6, "Event Name", 1, 0, "C")
-        pdf.cell(15, 6, "Heat", 1, 0,"C")
-        pdf.cell(15, 6, "Lane", 1, 0, "C")
-        pdf.cell(20, 6, "Time", 1, 1, "C")
-        # Rows under swimmer
-        pdf.set_font("DejaVu", "B", 9)
-        for entry in entries:
+    if len(favorites_entries) > 0:
+        pdf.add_page()
+        pdf.set_font("DejaVu", "B", 14)
+        pdf.cell(0, 20, "Favorite Swimmers", ln=1)
+        pdf.set_font("DejaVu", "", 10)
+    
+        # # ------------------------------------------
+        # Render grouped output
+        # ------------------------------------------
+        for swimmer_name, entries in favorites_entries.items(): # grouped.items():
+    
+            # Swimmer header
+            pdf.set_font("DejaVu", "B", 11)
+            pdf.cell(0, 6, safe_text(swimmer_name), ln=1)
+    
+            # Table header
+            pdf.set_font("DejaVu", "B", 10)
             pdf.cell(20, 6, "", 0, 0)  # indent
-            pdf.cell(15, 6, str(entry.event.event_number), 1, 0, "C")
-            pdf.cell(100, 6, entry.event.name, 1, 0, "L")
-            pdf.cell(15, 6, str(entry.heat_number), 1, 0, "C")
-            pdf.cell(15, 6, str(entry.lane_number), 1, 0, "C")
-            pdf.cell(20, 6, entry.entry_time, 1, 1, "R")
-        pdf.ln(2)
+            pdf.cell(15, 6, "Event", 1, 0, "C")
+            pdf.cell(100, 6, "Event Name", 1, 0, "C")
+            pdf.cell(15, 6, "Heat", 1, 0,"C")
+            pdf.cell(15, 6, "Lane", 1, 0, "C")
+            pdf.cell(20, 6, "Time", 1, 1, "C")
+            # Rows under swimmer
+            pdf.set_font("DejaVu", "B", 9)
+            for entry in entries:
+                pdf.cell(20, 6, "", 0, 0)  # indent
+                pdf.cell(15, 6, str(entry.event.event_number), 1, 0, "C")
+                pdf.cell(100, 6, entry.event.name, 1, 0, "L")
+                pdf.cell(15, 6, str(entry.heat_number), 1, 0, "C")
+                pdf.cell(15, 6, str(entry.lane_number), 1, 0, "C")
+                pdf.cell(20, 6, entry.entry_time, 1, 1, "R")
+            pdf.ln(2)
 
     # --------------------------------------------------
     # HEAT SHEET
