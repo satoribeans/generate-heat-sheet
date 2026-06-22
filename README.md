@@ -43,4 +43,8 @@ Report issues or submit PRs. If reporting parsing problems, include a (redacted)
 
 ## License
 
-MIT
+MIT License – feel free to use and modify for your needs.
+
+---
+
+Happy swimming! 🏊‍♀️🏊‍♂️
