@@ -4,26 +4,10 @@ from collections import defaultdict
 
 
 
-# -----------------------------
-# Convert Entry objects → sortable list
-# -----------------------------
-def sort_entries(entries, order):
-    if order == "fast_to_slow":
-        return sorted(
-            entries,
-            key=lambda e: time_to_seconds(e.entry_time)
-        )
-
-    return sorted(
-        entries,
-        key=lambda e: time_to_seconds(e.entry_time),
-        reverse=True
-    )
-
-# -----------------------------
+# --------------------------------------
 # Heat assignment (circle seeding style)
-# -----------------------------
-def seed_event(entries, lane_count=8):
+# --------------------------------------
+def seed_event(entries, lane_count=8, reverse_heats=True):
     if not entries:
         return []
 
@@ -55,7 +39,8 @@ def seed_event(entries, lane_count=8):
 
     # Heat 1 = slowest heat
     # Last heat = fastest heat
-    heats_entries.reverse()
+    if reverse_heats:
+        heats_entries.reverse()
 
     final_heats = []
 
@@ -96,16 +81,14 @@ def build_heat_sheet(meet) -> Meet:
     order = meet.settings.distance_event_order
 
     for event in meet.events:
-
+        reverse_heats = True
         entries = event.entries
 
-        # long/mixed event logic
-        # if "mixed" in event.name.lower():
-        if is_long_event(event.name.lower()):
-            entries = sort_entries(entries, order)
+        if is_long_event(event.name.lower()) and order == "fast_to_slow":
+            reverse_heats = False
 
         # generate heats, return list[Heat]
-        heats = seed_event(entries, lanes)
+        heats = seed_event(entries, lanes, reverse_heats)
         # attach to event model
         event.heats = heats
 
