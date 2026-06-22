@@ -1,0 +1,9 @@
+# OS files
+.DS_Store
+
+# idea files
+.idea/
+
+# python files
+__pycache__/
+*.pyc
