@@ -42,7 +42,7 @@ def clean_line(line):
 
 def is_long_event(name):
     name = name.lower()
-    return any(x in name for x in ["400", "500", "800", "1500", "1650"])
+    return any(x in name for x in ["400", "500", "800", "1000", "1500", "1650"])
 
 # ==========================================================
 # TITLE EXTRACTION
