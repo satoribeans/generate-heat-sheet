@@ -277,14 +277,15 @@ def build_favorite_meet(meet, favorite_names):
             ]
 
             if filtered_lanes:
-                heat_copy = heat
-                heat_copy.lanes = filtered_lanes
-                filtered_heats.append(heat_copy)
+                # heat_copy = heat
+                # heat_copy.lanes = filtered_lanes
+                # filtered_heats.append(heat_copy)
+                filtered_events.append(event)
 
-        if filtered_heats:
-            event_copy = event
-            event_copy.heats = filtered_heats
-            filtered_events.append(event_copy)
+        # if filtered_heats:
+        #     event_copy = event
+        #     event_copy.heats = filtered_heats
+        #     filtered_events.append(event_copy)
 
     meet_copy = Meet(
         name=f"{meet.name} - Favorites",
