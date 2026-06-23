@@ -101,6 +101,9 @@ generate = st.button("Generate Heat Sheet")
 # -------------------------
 # GENERATE ONLY ON CLICK
 # -------------------------
+
+favorite_entries = {}
+
 if generate and "meet" in st.session_state:
 
     meet = st.session_state["meet"]
