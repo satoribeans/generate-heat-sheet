@@ -95,6 +95,8 @@ def extract_meet_title(text):
         '',
         title
     )
+    # remove sanction number
+    title = re.sub(r'\s*-\s*Sanction\s*#\s*:\s*[^-]+', '', title, flags=re.IGNORECASE)
 
     # Prepend year if we found one
     if meet_year and not title.startswith(meet_year):
