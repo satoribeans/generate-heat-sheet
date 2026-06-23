@@ -260,3 +260,55 @@ def generate_pdf(meet, favorites_entries):
                 y_right += HEAT_SPACING
 
     return bytes(pdf.output(dest="S"))
+
+def generate_favorite_pdf(meet, favorites_entries):
+    pdf = PDF(
+        orientation="P",
+        unit="mm",
+        format="Letter"
+    )
+
+    pdf.alias_nb_pages()
+    pdf.title = f"{meet.name} - Favorites"
+
+    if not favorites_entries:
+        pdf.add_page()
+        pdf.set_font("DejaVu", "B", 12)
+        pdf.cell(0, 10, "No favorite swimmers selected.", ln=1)
+        return bytes(pdf.output(dest="S"))
+
+    # --------------------------------------------------
+    # FAVORITES PAGE
+    # --------------------------------------------------
+    pdf.add_page()
+
+    pdf.set_font("DejaVu", "B", 14)
+    pdf.cell(0, 10, "Favorite Swimmers Heat Sheet", ln=1)
+    pdf.ln(2)
+
+    for swimmer_name, entries in favorites_entries.items():
+
+        # Swimmer header
+        pdf.set_font("DejaVu", "B", 11)
+        pdf.cell(0, 6, safe_text(swimmer_name), ln=1)
+
+        # Table header
+        pdf.set_font("DejaVu", "B", 10)
+        pdf.cell(15, 6, "Event", 1, 0, "C")
+        pdf.cell(95, 6, "Event Name", 1, 0, "C")
+        pdf.cell(15, 6, "Heat", 1, 0, "C")
+        pdf.cell(15, 6, "Lane", 1, 0, "C")
+        pdf.cell(25, 6, "Time", 1, 1, "C")
+
+        pdf.set_font("DejaVu", "", 9)
+
+        for entry in entries:
+            pdf.cell(15, 6, str(entry.event.event_number), 1, 0, "C")
+            pdf.cell(95, 6, safe_text(entry.event.name), 1, 0, "L")
+            pdf.cell(15, 6, str(entry.heat_number), 1, 0, "C")
+            pdf.cell(15, 6, str(entry.lane_number), 1, 0, "C")
+            pdf.cell(25, 6, entry.entry_time, 1, 1, "R")
+
+        pdf.ln(4)
+
+    return bytes(pdf.output(dest="S"))
