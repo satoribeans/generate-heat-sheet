@@ -166,7 +166,8 @@ if generate and "meet" in st.session_state:
     st.session_state["pdf"] = pdf
     st.session_state["favorite_entries"] = favorite_entries
 
-    show_pdf_preview(pdf)
+    # PDF preview - blocked by chrome
+    # show_pdf_preview(pdf)
     
 # -------------------------
 # ALWAYS RENDER OUTPUT (KEY FIX)
