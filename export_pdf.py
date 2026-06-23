@@ -271,6 +271,7 @@ def build_favorite_meet(meet, favorite_names):
     
     for event in meet.events:
         has_favorite = False        
+        
         for heat in event.heats:
             filtered_lanes = [
                 lane for lane in heat.lanes
@@ -280,15 +281,15 @@ def build_favorite_meet(meet, favorite_names):
             if filtered_lanes:
                 has_favorite = True
                 break
+        
         if has_favorite:
             filtered_events.append(event)
 
-    meet_copy = Meet(
+    return Meet(
         name=f"{meet.name} - Favorites",
         settings=meet.settings,
         events=filtered_events
     )
-    return meet_copy
 
 def generate_favorite_pdf(meet, favorites_entries):
 
