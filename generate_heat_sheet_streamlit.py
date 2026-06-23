@@ -9,6 +9,11 @@ from seeding import build_heat_sheet
 from utils import extract_meet_title
 
 
+@st.cache_data
+def build_favorite_pdf(meet_id, favorite_entries):
+    return generate_favorite_pdf(meet_id, favorite_entries)
+
+
 st.set_page_config(layout="wide")
 st.title("🏊 Heat Sheet Generator")
 
@@ -121,7 +126,6 @@ if generate and "meet" in st.session_state:
 
     st.session_state["html"] = html
     st.session_state["pdf"] = pdf
-    fav_pdf_bytes = generate_favorite_pdf(meet, favorite_entries)
     
 # -------------------------
 # ALWAYS RENDER OUTPUT (KEY FIX)
@@ -142,13 +146,15 @@ if "html" in st.session_state:
         key="download_pdf"
     )
 
-    
-    st.download_button(
-        "📄 Download Favorite Swimmers Heat Sheet PDF",
-        data= fav_pdf_bytes,
-        file_name=f"{meet.name}_favorites.pdf",
-        mime="application/pdf"
-     )
+    if favorite_entries and len(favorite_entries) > 0:
+        pdf_bytes = generate_favorite_pdf(meet, favorite_entries)
+
+        st.download_button(
+            "📄 Download Favorite Swimmers Heat Sheet PDF",
+            data=pdf_bytes,
+            file_name=f"{meet.name}_favorites.pdf",
+            mime="application/pdf"
+        )
 
     st.components.v1.html(
         st.session_state["html"],
