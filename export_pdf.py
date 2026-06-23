@@ -267,16 +267,18 @@ def generate_pdf(meet, favorites_entries):
 # ------------------------------------------
 def build_favorite_meet(meet, favorite_names):
 
-    filtered_events = []
+    favorite_names = set(favorite_names)
 
-    for event in meet.events:
+    filtered_events = [
+        event
+        for event in meet.events
         if any(
             lane.entry
             and lane.entry.swimmer.name in favorite_names
             for heat in event.heats
             for lane in heat.lanes
-        ):
-            filtered_events.append(event)
+        )
+    ]
 
     return Meet(
         name=f"{meet.name} - Favorites",
