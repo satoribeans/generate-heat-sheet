@@ -142,10 +142,11 @@ if "html" in st.session_state:
     )
 
      st.download_button(
-            label="📄 Download Favorite Swimmers Heat Sheet PDF",
-            data=pdf_bytes,
-            file_name=f"{meet.name}_favorites.pdf",
-            mime="application/pdf"
+        label="📄 Download Favorite Swimmers Heat Sheet PDF",
+        data=pdf_bytes,
+        file_name=f"{meet.name}_favorites.pdf",
+        mime="application/pdf"
+     )
 
     st.components.v1.html(
         st.session_state["html"],
