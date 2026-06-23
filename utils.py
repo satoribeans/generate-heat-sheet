@@ -33,6 +33,7 @@ def clean_line(line):
     return (
         line.replace("Butter7ly", "Butterfly")
             .replace("Butterﬂy", "Butterfly")
+            .replace("Butterϐly", "Butterfly")
             .replace("CrutchEield", "Crutchfield")
             .replace("Crutchﬁeld", "Crutchfield")
             .replace("-NC", "")
