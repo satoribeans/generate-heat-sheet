@@ -48,26 +48,39 @@ def is_long_event(name):
 # ==========================================================
 # TITLE EXTRACTION
 # ==========================================================
+# def extract_meet_title(text):
+#     lines = text.splitlines()
+#     title_lines = []
+
+#     for line in lines[:30]:
+#         line = line.strip()
+
+#         line = re.sub(r"\bpsych\s+sheet\b", "Heat Sheet", line, flags=re.IGNORECASE)
+#         line = re.sub(r"\bpsyc\s+sheet\b", "Heat Sheet", line, flags=re.IGNORECASE)
+
+#         if not line:
+#             continue
+
+#         if re.search(r'(?:Event\s+|#)\d+', line):
+#             break
+
+#         if "PAGE" in line.upper():
+#             continue
+
+#         title_lines.append(line)
+
+#     return " - ".join(title_lines[:3]) if title_lines else "Swim Meet Heat Sheet"
 def extract_meet_title(text):
-    lines = text.splitlines()
-    title_lines = []
 
-    for line in lines[:30]:
-        line = line.strip()
+    # Take first chunk of text where header likely exists
+    header = " ".join(text.splitlines()[:10])
+    match = re.search(
+        # r'^(.+?)\s*-\s*\d{1,2}/\d{1,2}/\d{4}\s+to\s+\d{1,2}/\d{1,2}/\d{4}',
+        (.+?)\s*-\s*\d{1,2}/\d{1,2}/\d{4}\s+to\s+\d{1,2}/\d{1,2}/\d{4},
+        header
+    )
 
-        line = re.sub(r"\bpsych\s+sheet\b", "Heat Sheet", line, flags=re.IGNORECASE)
-        line = re.sub(r"\bpsyc\s+sheet\b", "Heat Sheet", line, flags=re.IGNORECASE)
-
-        if not line:
-            continue
-
-        if re.search(r'(?:Event\s+|#)\d+', line):
-            break
-
-        if "PAGE" in line.upper():
-            continue
-
-        title_lines.append(line)
-
-    return " - ".join(title_lines[:3]) if title_lines else "Swim Meet Heat Sheet"
+    if match:
+        return match.group(1).strip()
+    return "Swim Meet"
 
