@@ -53,53 +53,46 @@ def is_long_event(name):
 def extract_meet_title(text):
     lines = text.splitlines()
     title_lines = []
+    meet_year = None  # we will extract from date range
 
     for line in lines[:30]:
         line = line.strip()
 
+        # Normalize psych sheet text
         line = re.sub(r"\bpsych\s+sheet\b", "Heat Sheet", line, flags=re.IGNORECASE)
         line = re.sub(r"\bpsyc\s+sheet\b", "Heat Sheet", line, flags=re.IGNORECASE)
 
         if not line:
             continue
 
+        # Extract year from date range (once found)
+        if meet_year is None:
+            date_match = re.search(
+                r'(\d{1,2})/\d{1,2}/(\d{4})\s+to\s+\d{1,2}/\d{1,2}/\d{4}',
+                line
+            )
+            if date_match:
+                meet_year = date_match.group(2)
+
+        # Stop at event section
         if re.search(r'(?:Event\s+|#)\d+', line):
             break
 
+        # Skip page markers
         if "PAGE" in line.upper():
             continue
 
         title_lines.append(line)
 
-    return " - ".join(title_lines[:3]) if title_lines else "Swim Meet Heat Sheet"
+    if not title_lines:
+        return "Swim Meet Heat Sheet"
 
+    # Build title
+    title = " - ".join(title_lines[:3])
 
-# def extract_meet_title(text):
-#     header = " ".join(text.splitlines()[:10])
-#     current_year = str(datetime.now().year)
+    # Prepend year if we found one
+    if meet_year and not title.startswith(meet_year):
+        title = f"{meet_year} {title}"
 
-#     # Case 1: year is present
-#     match = re.search(
-#         r'^(\d{4}\s+.+?)\s*-\s*\d{1,2}/\d{1,2}/\d{4}\s+to\s+\d{1,2}/\d{1,2}/\d{4}',
-#         header
-#     )
-
-#     if match:
-#         return match.group(1).strip()
-
-#     # Case 2: no year, but still has meet title + date range
-#     match = re.search(
-#         r'^(.+?)\s*-\s*\d{1,2}/\d{1,2}/\d{4}\s+to\s+\d{1,2}/\d{1,2}/\d{4}',
-#         header
-#     )
-
-#     if match:
-#         title = match.group(1).strip()
-
-#         # If it does NOT start with a year, prepend current year
-#         if not re.match(r'^\d{4}', title):
-#             title = f"{current_year} {title}"
-
-#         return title
-
-#     return "Swim Meet"
+    return title
+    # return " - ".join(title_lines[:3]) if title_lines else "Swim Meet Heat Sheet"
