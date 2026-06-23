@@ -1,5 +1,6 @@
 from html import escape
 
+
 def favorite_swimmers_html(favorites):
     html = []
 
@@ -20,14 +21,17 @@ def favorite_swimmers_html(favorites):
             html.append(f"""
             <tr>
                 <td>{entry.event.event_number}</td>
-                <td>{entry.event.name}</td>
+                <td>{escape(entry.event.name)}</td>
                 <td>{entry.heat_number}</td>
                 <td>{entry.lane_number}</td>
                 <td>{entry.entry_time}</td>
             </tr>
             """)
+
         html.append("</table>")
+
     return "".join(html)
+
 
 def generate_html_preview(meet, favorites):
     favorite_entries = meet.favorite_entries(favorites)
@@ -48,22 +52,26 @@ def generate_html_preview(meet, favorites):
     # ==================
     if favorite_entries:
         rows.append("<h2>⭐ Favorite Swimmers</h2>")
-        rows.append(
-            favorite_swimmers_html(favorite_entries)
-        )
+        rows.append(favorite_swimmers_html(favorite_entries))
 
+    # ==================
+    # Events + Heats
+    # ==================
     for event in meet.events:
 
+        # ---- Event collapsible ----
+        rows.append("<details class='event-block'>")
         rows.append(
-            f"<h2>Event {event.event_number}: "
-            f"{escape(event.name)}</h2>"
+            f"<summary><strong>"
+            f"Event {event.event_number}: {escape(event.name)}"
+            f"</strong></summary>"
         )
 
+        # ---- Heats ----
         for heat in event.heats:
 
-            rows.append(
-                f"<h3>Heat {heat.heat_number}</h3>"
-            )
+            rows.append("<details class='heat-block'>")
+            rows.append(f"<summary>Heat {heat.heat_number}</summary>")
 
             rows.append("""
             <table class="heat-table">
@@ -88,39 +96,39 @@ def generate_html_preview(meet, favorites):
                 entry = lane.entry
                 if not entry:
                     continue
-                    
-                swimmer = entry.swimmer
 
+                swimmer = entry.swimmer
                 is_favorite = swimmer.name in favorite_entries
 
                 name = escape(swimmer.name)
                 team = escape(swimmer.team)
 
-                rows.append(
-                    f"""
-                    <tr class="{'favorite' if is_favorite else ''}">
-                        <td>{lane.lane_number}</td>
-                        <td>{'★ ' if is_favorite else ''}{name}</td>
-                        <td>{swimmer.age}</td>
-                        <td>{team}</td>
-                        <td>{entry.entry_time}</td>
-                    </tr>
-                    """
-                )
+                rows.append(f"""
+                <tr class="{'favorite' if is_favorite else ''}">
+                    <td>{lane.lane_number}</td>
+                    <td>{'★ ' if is_favorite else ''}{name}</td>
+                    <td>{swimmer.age}</td>
+                    <td>{team}</td>
+                    <td>{entry.entry_time}</td>
+                </tr>
+                """)
 
             rows.append("""
                 </tbody>
             </table>
             """)
 
+            rows.append("</details>")  # close heat
+
+        rows.append("</details>")  # close event
+
     html = f"""
     <!DOCTYPE html>
     <html>
     <head>
         <meta charset="utf-8">
-        <meta name="viewport"
-          content="width=device-width, initial-scale=1">
-                  
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
         <style>
 
             body {{
@@ -143,13 +151,12 @@ def generate_html_preview(meet, favorites):
                 margin-top: 15px;
                 margin-bottom: 5px;
             }}
-                  
+
             .heat-table,
-            .fav-swimmer-table{{
+            .fav-swimmer-table {{
                 border-collapse: collapse;
                 table-layout: fixed;
                 width: 700px;
-                /* margin-bottom: 20px; */
             }}
 
             .heat-table th,
@@ -173,8 +180,33 @@ def generate_html_preview(meet, favorites):
                 background: #fff8dc;
             }}
 
-            /* fixed widths */
+            /* collapsible styling */
+            details {{
+                margin-bottom: 10px;
+                border: 1px solid #ddd;
+                border-radius: 6px;
+                padding: 6px 10px;
+                background: #fafafa;
+            }}
 
+            summary {{
+                cursor: pointer;
+                font-size: 1.05rem;
+                padding: 4px 0;
+            }}
+
+            summary:hover {{
+                color: #2a5bd7;
+            }}
+
+            details.heat-block {{
+                margin-left: 12px;
+                border-left: 2px solid #ddd;
+                padding-left: 10px;
+                background: #ffffff;
+            }}
+
+            /* fixed widths */
             .heat-table th:nth-child(1),
             .heat-table td:nth-child(1) {{
                 width: 50px;
@@ -208,19 +240,18 @@ def generate_html_preview(meet, favorites):
                 width: 50px;
                 text-align: center;
             }}
-            
+
             .fav-swimmer-table th:nth-child(2),
             .fav-swimmer-table td:nth-child(2) {{
                 width: 350px;
-                text-align: left;
             }}
-            
+
             .fav-swimmer-table th:nth-child(3),
             .fav-swimmer-table td:nth-child(3) {{
                 width: 50px;
                 text-align: center;
             }}
-            
+
             .fav-swimmer-table th:nth-child(4),
             .fav-swimmer-table td:nth-child(4) {{
                 width: 50px;
@@ -233,40 +264,24 @@ def generate_html_preview(meet, favorites):
                 text-align: right;
             }}
 
-            /* Mobile support */
-
+            /* mobile */
             @media (max-width: 768px) {{
                 body {{
                     margin: 8px;
                 }}
-            
-                h1 {{
-                    font-size: 1.5rem;
-                }}
-            
-                h2 {{
-                    font-size: 1.2rem;
-                }}
-            
-                h3 {{
-                    font-size: 1rem;
-                }}
-            
+
                 .heat-table,
                 .fav-swimmer-table {{
                     display: block;
                     overflow-x: auto;
                     max-width: 100%;
                 }}
-            
-                .heat-table th,
-                .heat-table td,
-                .fav-swimmer-table th,
-                .fav-swimmer-table td {{
-                    font-size: 13px;
+
+                summary {{
+                    font-size: 1rem;
                 }}
             }}
-                  
+
         </style>
     </head>
 
@@ -277,3 +292,5 @@ def generate_html_preview(meet, favorites):
     """
 
     return html
+
+    
