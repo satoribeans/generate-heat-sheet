@@ -235,7 +235,7 @@ def generate_html_preview(meet, favorites):
 
             /* Mobile support */
 
-            @media (max-width: 768px) {
+            @media (max-width: 768px) {{
                 body {
                     margin: 8px;
                 }
@@ -265,7 +265,7 @@ def generate_html_preview(meet, favorites):
                 .fav-swimmer-table td {
                     font-size: 13px;
                 }
-            }
+            }}
                   
         </style>
     </head>
