@@ -286,29 +286,76 @@ def generate_favorite_pdf(meet, favorites_entries):
     pdf.cell(0, 10, "Favorite Swimmers Heat Sheet", ln=1)
     pdf.ln(2)
 
-    for swimmer_name, entries in favorites_entries.items():
+    # --------------------------------------------------
+    # Build quick lookup set for speed
+    # --------------------------------------------------
+    favorite_names = set(favorites_entries.keys())
 
-        # Swimmer header
-        pdf.set_font("DejaVu", "B", 11)
-        pdf.cell(0, 6, safe_text(swimmer_name), ln=1)
+    for swimmer_name in favorite_names:
 
-        # Table header
-        pdf.set_font("DejaVu", "B", 10)
-        pdf.cell(15, 6, "Event", 1, 0, "C")
-        pdf.cell(95, 6, "Event Name", 1, 0, "C")
-        pdf.cell(15, 6, "Heat", 1, 0, "C")
-        pdf.cell(15, 6, "Lane", 1, 0, "C")
-        pdf.cell(25, 6, "Time", 1, 1, "C")
+        pdf.set_font("DejaVu", "B", 12)
+        pdf.cell(0, 8, safe_text(swimmer_name), ln=1)
 
-        pdf.set_font("DejaVu", "", 9)
+        for event in meet.events:
 
-        for entry in entries:
-            pdf.cell(15, 6, str(entry.event.event_number), 1, 0, "C")
-            pdf.cell(95, 6, safe_text(entry.event.name), 1, 0, "L")
-            pdf.cell(15, 6, str(entry.heat_number), 1, 0, "C")
-            pdf.cell(15, 6, str(entry.lane_number), 1, 0, "C")
-            pdf.cell(25, 6, entry.entry_time, 1, 1, "R")
+            event_has_swimmer = False
 
-        pdf.ln(4)
+            for heat in event.heats:
+                for lane in heat.lanes:
+                    entry = lane.entry
+                    if entry and entry.swimmer.name == swimmer_name:
+                        event_has_swimmer = True
+                        break
+
+            if not event_has_swimmer:
+                continue
+
+            # Event header
+            pdf.set_font("DejaVu", "B", 11)
+            pdf.cell(0, 7, f"Event {event.event_number}: {safe_text(event.name)}", ln=1)
+
+            for heat in event.heats:
+
+                heat_has_swimmer = False
+
+                for lane in heat.lanes:
+                    entry = lane.entry
+                    if entry and entry.swimmer.name == swimmer_name:
+                        heat_has_swimmer = True
+                        break
+
+                if not heat_has_swimmer:
+                    continue
+
+                # Heat header
+                pdf.set_font("DejaVu", "B", 10)
+                pdf.cell(0, 6, f"Heat {heat.heat_number}", ln=1)
+
+                # Table header
+                pdf.set_font("DejaVu", "B", 9)
+                pdf.cell(10, 6, "Lane", 1, 0, "C")
+                pdf.cell(60, 6, "Name", 1, 0, "L")
+                pdf.cell(10, 6, "Age", 1, 0, "C")
+                pdf.cell(25, 6, "Team", 1, 0, "L")
+                pdf.cell(25, 6, "Time", 1, 1, "R")
+
+                pdf.set_font("DejaVu", "", 9)
+
+                # FULL HEAT (not just swimmer row)
+                for lane in sorted(heat.lanes, key=lambda l: l.lane_number):
+                    entry = lane.entry
+                    if not entry:
+                        continue
+
+                    swimmer = entry.swimmer
+                    is_fav = swimmer.name == swimmer_name
+
+                    pdf.cell(10, 6, str(lane.lane_number), 1, 0, "C")
+                    pdf.cell(60, 6, safe_text(swimmer.name), 1, 0, "L")
+                    pdf.cell(10, 6, str(swimmer.age), 1, 0, "C")
+                    pdf.cell(25, 6, safe_text(swimmer.team), 1, 0, "L")
+                    pdf.cell(25, 6, entry.entry_time, 1, 1, "R")
+
+                pdf.ln(2)
 
     return bytes(pdf.output(dest="S"))
