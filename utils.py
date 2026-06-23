@@ -71,9 +71,7 @@ def is_long_event(name):
 
 #     return " - ".join(title_lines[:3]) if title_lines else "Swim Meet Heat Sheet"
 def extract_meet_title(text):
-
-    # Grab early portion of document (more robust than fixed lines)
-    header = text[:1500]
+    header = " ".join(text.splitlines()[:10])
     match = re.search(
         r'^(\d{4}\s+.+?)\s*-\s*\d{1,2}/\d{1,2}/\d{4}\s+to\s+\d{1,2}/\d{1,2}/\d{4}',
         header
