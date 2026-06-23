@@ -121,7 +121,8 @@ if generate and "meet" in st.session_state:
 
     st.session_state["html"] = html
     st.session_state["pdf"] = pdf
-
+    fav_pdf_bytes = generate_favorite_pdf(meet, favorite_entries)
+    
 # -------------------------
 # ALWAYS RENDER OUTPUT (KEY FIX)
 # -------------------------
@@ -137,13 +138,14 @@ if "html" in st.session_state:
     st.download_button(
         "Download Meet Heat Sheet PDF",
         st.session_state["pdf"],
-        file_name="heat.pdf",
+        file_name="{meet.name}_heatsheet.pdf",
         key="download_pdf"
     )
 
-     st.download_button(
-        label="📄 Download Favorite Swimmers Heat Sheet PDF",
-        data=pdf_bytes,
+    
+    st.download_button(
+        "📄 Download Favorite Swimmers Heat Sheet PDF",
+        data= fav_pdf_bytes,
         file_name=f"{meet.name}_favorites.pdf",
         mime="application/pdf"
      )
