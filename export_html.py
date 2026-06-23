@@ -236,48 +236,40 @@ def generate_html_preview(meet, favorites):
                 text-align: right;
             }}
 
-            /* ==========================
-           Mobile support
-           ========================== */
+            /* Mobile support */
 
-        @media (max-width: 768px) {{
-
-            body {{
+        @media (max-width: 768px) {
+        
+            body {
                 margin: 8px;
-            }}
-
-            h1 {{
+            }
+        
+            h1 {
                 font-size: 1.5rem;
-            }}
-
-            h2 {{
+            }
+        
+            h2 {
                 font-size: 1.2rem;
-            }}
-
-            h3 {{
+            }
+        
+            h3 {
                 font-size: 1rem;
-            }}
-
+            }
+        
             .heat-table,
-            .fav-swimmer-table {{
-                width: 100%;
-                min-width: 600px;
-            }}
-
+            .fav-swimmer-table {
+                display: block;
+                overflow-x: auto;
+                max-width: 100%;
+            }
+        
             .heat-table th,
             .heat-table td,
             .fav-swimmer-table th,
-            .fav-swimmer-table td {{
+            .fav-swimmer-table td {
                 font-size: 13px;
-                padding: 6px 4px;
-            }}
-
-            .heat-table td:nth-child(2),
-            .fav-swimmer-table td:nth-child(2) {{
-                white-space: normal;
-                word-break: break-word;
-            }}
-        }}
+            }
+        }
                   
         </style>
     </head>
