@@ -115,7 +115,9 @@ def generate_html_preview(meet, favorites):
     <html>
     <head>
         <meta charset="utf-8">
-
+        <meta name="viewport"
+          content="width=device-width, initial-scale=1">
+                  
         <style>
 
             body {{
@@ -139,12 +141,18 @@ def generate_html_preview(meet, favorites):
                 margin-bottom: 5px;
             }}
 
+            .table-wrapper {{
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                margin-bottom: 20px;
+            }}
+                  
             .heat-table,
             .fav-swimmer-table{{
                 border-collapse: collapse;
                 table-layout: fixed;
                 width: 700px;
-                margin-bottom: 20px;
+                /* margin-bottom: 20px; */
             }}
 
             .heat-table th,
@@ -228,6 +236,49 @@ def generate_html_preview(meet, favorites):
                 text-align: right;
             }}
 
+            /* ==========================
+           Mobile support
+           ========================== */
+
+        @media (max-width: 768px) {{
+
+            body {{
+                margin: 8px;
+            }}
+
+            h1 {{
+                font-size: 1.5rem;
+            }}
+
+            h2 {{
+                font-size: 1.2rem;
+            }}
+
+            h3 {{
+                font-size: 1rem;
+            }}
+
+            .heat-table,
+            .fav-swimmer-table {{
+                width: 100%;
+                min-width: 600px;
+            }}
+
+            .heat-table th,
+            .heat-table td,
+            .fav-swimmer-table th,
+            .fav-swimmer-table td {{
+                font-size: 13px;
+                padding: 6px 4px;
+            }}
+
+            .heat-table td:nth-child(2),
+            .fav-swimmer-table td:nth-child(2) {{
+                white-space: normal;
+                word-break: break-word;
+            }}
+        }}
+                  
         </style>
     </head>
 
