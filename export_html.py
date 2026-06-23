@@ -48,6 +48,19 @@ def generate_html_preview(meet, favorites):
     )
 
     # ==================
+    # Expand/Collapse Button
+    # ==================
+    rows.append("""
+    <button onclick="toggleEvents()" style="
+        margin: 10px 0;
+        padding: 6px 10px;
+        cursor: pointer;
+    ">
+        Expand / Collapse All Events
+    </button>
+    """)
+
+    # ==================
     # Favorite Swimmers
     # ==================
     if favorite_entries:
@@ -55,24 +68,35 @@ def generate_html_preview(meet, favorites):
         rows.append(favorite_swimmers_html(favorite_entries))
 
     # ==================
-    # Events + Heats
+    # Events
     # ==================
     for event in meet.events:
 
-        # ---- Event collapsible ----
-        rows.append("<details class='event-block'>")
+        # detect if event contains favorite swimmer
+        event_has_favorite = False
+
+        for heat in event.heats:
+            for lane in heat.lanes:
+                entry = lane.entry
+                if entry and entry.swimmer.name in favorite_entries:
+                    event_has_favorite = True
+                    break
+
+        rows.append(f"""
+        <details class="event-block" {'open' if event_has_favorite else ''}>
+        """.strip())
+
         rows.append(
             f"<summary><strong>"
             f"Event {event.event_number}: {escape(event.name)}"
             f"</strong></summary>"
         )
 
-        # ---- Heats ----
         for heat in event.heats:
 
             rows.append(f"""
             <h3>Heat {heat.heat_number}</h3>
-            
+
             <table class="heat-table">
                 <thead>
                     <tr>
@@ -117,7 +141,7 @@ def generate_html_preview(meet, favorites):
             </table>
             """)
 
-        rows.append("</details>")  # close event
+        rows.append("</details>")
 
     html = f"""
     <!DOCTYPE html>
@@ -133,22 +157,6 @@ def generate_html_preview(meet, favorites):
                 margin: 20px;
             }}
 
-            h1 {{
-                margin-bottom: 10px;
-            }}
-
-            h2 {{
-                margin-top: 30px;
-                margin-bottom: 10px;
-                border-bottom: 2px solid #ddd;
-                padding-bottom: 4px;
-            }}
-
-            h3 {{
-                margin-top: 15px;
-                margin-bottom: 5px;
-            }}
-
             .heat-table,
             .fav-swimmer-table {{
                 border-collapse: collapse;
@@ -160,7 +168,7 @@ def generate_html_preview(meet, favorites):
             .heat-table td,
             .fav-swimmer-table th,
             .fav-swimmer-table td {{
-                border: 1px solid #cccccc;
+                border: 1px solid #ccc;
                 padding: 4px 6px;
                 overflow: hidden;
                 text-overflow: ellipsis;
@@ -177,9 +185,8 @@ def generate_html_preview(meet, favorites):
                 background: #fff8dc;
             }}
 
-            /* collapsible styling */
-            details {{
-                margin-bottom: 10px;
+            details.event-block {{
+                margin-bottom: 12px;
                 border: 1px solid #ddd;
                 border-radius: 6px;
                 padding: 6px 10px;
@@ -188,7 +195,7 @@ def generate_html_preview(meet, favorites):
 
             summary {{
                 cursor: pointer;
-                font-size: 1.05rem;
+                font-size: 1.1rem;
                 padding: 4px 0;
             }}
 
@@ -196,90 +203,24 @@ def generate_html_preview(meet, favorites):
                 color: #2a5bd7;
             }}
 
-            details.heat-block {{
-                margin-left: 12px;
-                border-left: 2px solid #ddd;
-                padding-left: 10px;
-                background: #ffffff;
-            }}
-
-            /* fixed widths */
-            .heat-table th:nth-child(1),
-            .heat-table td:nth-child(1) {{
-                width: 50px;
-                text-align: center;
-            }}
-
-            .heat-table th:nth-child(2),
-            .heat-table td:nth-child(2) {{
-                width: 280px;
-            }}
-
-            .heat-table th:nth-child(3),
-            .heat-table td:nth-child(3) {{
-                width: 60px;
-                text-align: center;
-            }}
-
-            .heat-table th:nth-child(4),
-            .heat-table td:nth-child(4) {{
-                width: 120px;
-            }}
-
-            .heat-table th:nth-child(5),
-            .heat-table td:nth-child(5) {{
-                width: 100px;
-                text-align: center;
-            }}
-
-            .fav-swimmer-table th:nth-child(1),
-            .fav-swimmer-table td:nth-child(1) {{
-                width: 50px;
-                text-align: center;
-            }}
-
-            .fav-swimmer-table th:nth-child(2),
-            .fav-swimmer-table td:nth-child(2) {{
-                width: 350px;
-            }}
-
-            .fav-swimmer-table th:nth-child(3),
-            .fav-swimmer-table td:nth-child(3) {{
-                width: 50px;
-                text-align: center;
-            }}
-
-            .fav-swimmer-table th:nth-child(4),
-            .fav-swimmer-table td:nth-child(4) {{
-                width: 50px;
-                text-align: center;
-            }}
-
-            .fav-swimmer-table th:nth-child(5),
-            .fav-swimmer-table td:nth-child(5) {{
-                width: 100px;
-                text-align: right;
-            }}
-
-            /* mobile */
-            @media (max-width: 768px) {{
-                body {{
-                    margin: 8px;
-                }}
-
-                .heat-table,
-                .fav-swimmer-table {{
-                    display: block;
-                    overflow-x: auto;
-                    max-width: 100%;
-                }}
-
-                summary {{
-                    font-size: 1rem;
-                }}
+            h3 {{
+                margin-top: 15px;
+                margin-bottom: 5px;
             }}
 
         </style>
+
+        <script>
+            function toggleEvents() {{
+                const events = document.querySelectorAll("details.event-block");
+                const anyClosed = Array.from(events).some(e => !e.open);
+
+                events.forEach(e => {{
+                    e.open = anyClosed;
+                }});
+            }}
+        </script>
+
     </head>
 
     <body>
@@ -289,5 +230,3 @@ def generate_html_preview(meet, favorites):
     """
 
     return html
-
-    
