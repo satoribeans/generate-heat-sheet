@@ -236,35 +236,35 @@ def generate_html_preview(meet, favorites):
             /* Mobile support */
 
             @media (max-width: 768px) {{
-                body {
+                body {{
                     margin: 8px;
-                }
+                }}
             
-                h1 {
+                h1 {{
                     font-size: 1.5rem;
-                }
+                }}
             
-                h2 {
+                h2 {{
                     font-size: 1.2rem;
-                }
+                }}
             
-                h3 {
+                h3 {{
                     font-size: 1rem;
-                }
+                }}
             
                 .heat-table,
-                .fav-swimmer-table {
+                .fav-swimmer-table {{
                     display: block;
                     overflow-x: auto;
                     max-width: 100%;
-                }
+                }}
             
                 .heat-table th,
                 .heat-table td,
                 .fav-swimmer-table th,
-                .fav-swimmer-table td {
+                .fav-swimmer-table td {{
                     font-size: 13px;
-                }
+                }}
             }}
                   
         </style>
