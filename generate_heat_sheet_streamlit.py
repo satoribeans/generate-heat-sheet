@@ -2,7 +2,7 @@ import streamlit as st
 import pypdf
 
 from export_html import generate_html_preview
-from export_pdf import generate_pdf
+from export_pdf import generate_pdf, generate_favorite_pdf
 from models import Meet, MeetSettings
 from parser import parse_psych_sheet
 from seeding import build_heat_sheet
@@ -121,6 +121,16 @@ if generate and "meet" in st.session_state:
 
     st.session_state["html"] = html
     st.session_state["pdf"] = pdf
+
+    if st.button("📄 Download Favorite Swimmers Heat Sheet"):
+    pdf_bytes = generate_favorite_pdf(meet, favorite_entries)
+
+    st.download_button(
+        label="Download PDF",
+        data=pdf_bytes,
+        file_name=f"{meet.name}_favorites.pdf",
+        mime="application/pdf"
+    )
 
 # -------------------------
 # ALWAYS RENDER OUTPUT (KEY FIX)
