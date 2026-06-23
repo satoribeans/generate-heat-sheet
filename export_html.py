@@ -157,6 +157,22 @@ def generate_html_preview(meet, favorites):
                 margin: 20px;
             }}
 
+            h1 {{
+                margin-bottom: 10px;
+            }}
+
+            h2 {{
+                margin-top: 30px;
+                margin-bottom: 10px;
+                border-bottom: 2px solid #ddd;
+                padding-bottom: 4px;
+            }}
+
+            h3 {{
+                margin-top: 15px;
+                margin-bottom: 5px;
+            }}
+
             .heat-table,
             .fav-swimmer-table {{
                 border-collapse: collapse;
@@ -168,7 +184,7 @@ def generate_html_preview(meet, favorites):
             .heat-table td,
             .fav-swimmer-table th,
             .fav-swimmer-table td {{
-                border: 1px solid #ccc;
+                border: 1px solid #cccccc;
                 padding: 4px 6px;
                 overflow: hidden;
                 text-overflow: ellipsis;
@@ -185,6 +201,7 @@ def generate_html_preview(meet, favorites):
                 background: #fff8dc;
             }}
 
+            /* collapsible event styling */
             details.event-block {{
                 margin-bottom: 12px;
                 border: 1px solid #ddd;
@@ -203,9 +220,79 @@ def generate_html_preview(meet, favorites):
                 color: #2a5bd7;
             }}
 
-            h3 {{
-                margin-top: 15px;
-                margin-bottom: 5px;
+            /* fixed widths */
+            .heat-table th:nth-child(1),
+            .heat-table td:nth-child(1) {{
+                width: 50px;
+                text-align: center;
+            }}
+
+            .heat-table th:nth-child(2),
+            .heat-table td:nth-child(2) {{
+                width: 280px;
+            }}
+
+            .heat-table th:nth-child(3),
+            .heat-table td:nth-child(3) {{
+                width: 60px;
+                text-align: center;
+            }}
+
+            .heat-table th:nth-child(4),
+            .heat-table td:nth-child(4) {{
+                width: 120px;
+            }}
+
+            .heat-table th:nth-child(5),
+            .heat-table td:nth-child(5) {{
+                width: 100px;
+                text-align: center;
+            }}
+
+            .fav-swimmer-table th:nth-child(1),
+            .fav-swimmer-table td:nth-child(1) {{
+                width: 50px;
+                text-align: center;
+            }}
+
+            .fav-swimmer-table th:nth-child(2),
+            .fav-swimmer-table td:nth-child(2) {{
+                width: 350px;
+            }}
+
+            .fav-swimmer-table th:nth-child(3),
+            .fav-swimmer-table td:nth-child(3) {{
+                width: 50px;
+                text-align: center;
+            }}
+
+            .fav-swimmer-table th:nth-child(4),
+            .fav-swimmer-table td:nth-child(4) {{
+                width: 50px;
+                text-align: center;
+            }}
+
+            .fav-swimmer-table th:nth-child(5),
+            .fav-swimmer-table td:nth-child(5) {{
+                width: 100px;
+                text-align: right;
+            }}
+
+            @media (max-width: 768px) {{
+                body {{
+                    margin: 8px;
+                }}
+
+                .heat-table,
+                .fav-swimmer-table {{
+                    display: block;
+                    overflow-x: auto;
+                    max-width: 100%;
+                }}
+
+                summary {{
+                    font-size: 1rem;
+                }}
             }}
 
         </style>
