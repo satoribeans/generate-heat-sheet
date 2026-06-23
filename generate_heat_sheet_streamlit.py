@@ -125,9 +125,6 @@ generate = st.button("Generate Heat Sheet")
 # -------------------------
 # GENERATE ONLY ON CLICK
 # -------------------------
-
-favorite_entries = {}
-
 if generate and "meet" in st.session_state:
 
     meet = st.session_state["meet"]
@@ -153,12 +150,16 @@ if generate and "meet" in st.session_state:
 
     st.session_state["html"] = html
     st.session_state["pdf"] = pdf
+    st.session_state["favorite_entries"] = favorite_entries
     
 # -------------------------
 # ALWAYS RENDER OUTPUT (KEY FIX)
 # -------------------------
 
 if "html" in st.session_state:
+    
+    meet = st.session_state.get("meet")
+    favorite_entries = st.session_state.get("favorite_entries", {})
 
     st.download_button(
         "Download HTML",
@@ -169,7 +170,7 @@ if "html" in st.session_state:
     st.download_button(
         "Download Meet Heat Sheet PDF",
         st.session_state["pdf"],
-        file_name="{meet.name}_heatsheet.pdf",
+        file_name=f"{meet.name}_heatsheet.pdf",
         key="download_pdf"
     )
 
