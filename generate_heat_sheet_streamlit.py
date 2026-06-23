@@ -123,13 +123,13 @@ if generate and "meet" in st.session_state:
     st.session_state["pdf"] = pdf
 
     if st.button("📄 Download Favorite Swimmers Heat Sheet"):
-    pdf_bytes = generate_favorite_pdf(meet, favorite_entries)
-
-    st.download_button(
-        label="Download PDF",
-        data=pdf_bytes,
-        file_name=f"{meet.name}_favorites.pdf",
-        mime="application/pdf"
+        pdf_bytes = generate_favorite_pdf(meet, favorite_entries)
+    
+        st.download_button(
+            label="Download PDF",
+            data=pdf_bytes,
+            file_name=f"{meet.name}_favorites.pdf",
+            mime="application/pdf"
     )
 
 # -------------------------
