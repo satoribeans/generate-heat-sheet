@@ -13,6 +13,22 @@ from utils import extract_meet_title
 def build_favorite_pdf(meet_id, favorite_entries):
     return generate_favorite_pdf(meet_id, favorite_entries)
 
+def reset_meet_state():
+    keys_to_clear = [
+        "meet",
+        "meet_title",
+        "all_names",
+        "favorites",
+        "html",
+        "pdf",
+    ]
+
+    for k in keys_to_clear:
+        if k in st.session_state:
+            del st.session_state[k]
+
+    # clear cached functions (important)
+    build_favorite_pdf.clear()
 
 st.set_page_config(layout="wide")
 st.title("🏊 Heat Sheet Generator")
@@ -59,6 +75,14 @@ with col1:
 
 with col2:
     uploaded = st.file_uploader("", type=["pdf"], label_visibility="collapsed")
+
+    # Detect new file upload and reset state
+    if uploaded:
+        file_id = uploaded.name + str(uploaded.size)
+    
+        if st.session_state.get("last_file_id") != file_id:
+            reset_meet_state()
+            st.session_state["last_file_id"] = file_id
 
 if "all_names" not in st.session_state:
     st.session_state["all_names"] = []
