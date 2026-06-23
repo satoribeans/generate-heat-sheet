@@ -89,6 +89,12 @@ def extract_meet_title(text):
 
     # Build title
     title = " - ".join(title_lines[:3])
+    # remove date range from the title
+    title = re.sub(
+        r'\s*-\s*\d{1,2}/\d{1,2}/\d{4}\s+to\s+\d{1,2}/\d{1,2}/\d{4}',
+        '',
+        title
+    )
 
     # Prepend year if we found one
     if meet_year and not title.startswith(meet_year):
