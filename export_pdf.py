@@ -1,5 +1,6 @@
 from fpdf import FPDF
 from utils import safe_text
+from models import Meet
 
 
 class PDF(FPDF):
