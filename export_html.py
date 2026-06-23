@@ -70,10 +70,9 @@ def generate_html_preview(meet, favorites):
         # ---- Heats ----
         for heat in event.heats:
 
-            rows.append("<details class='heat-block'>")
-            rows.append(f"<summary>Heat {heat.heat_number}</summary>")
-
-            rows.append("""
+            rows.append(f"""
+            <h3>Heat {heat.heat_number}</h3>
+            
             <table class="heat-table">
                 <thead>
                     <tr>
@@ -117,8 +116,6 @@ def generate_html_preview(meet, favorites):
                 </tbody>
             </table>
             """)
-
-            rows.append("</details>")  # close heat
 
         rows.append("</details>")  # close event
 
