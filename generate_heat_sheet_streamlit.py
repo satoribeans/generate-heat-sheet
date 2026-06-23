@@ -1,5 +1,6 @@
 import streamlit as st
 import pypdf
+import base64
 
 from export_html import generate_html_preview
 from export_pdf import generate_pdf, generate_favorite_pdf
@@ -12,6 +13,19 @@ from utils import extract_meet_title
 @st.cache_data
 def build_favorite_pdf(meet_id, favorite_entries):
     return generate_favorite_pdf(meet_id, favorite_entries)
+
+
+def show_pdf_preview(pdf_bytes):
+    b64 = base64.b64encode(pdf_bytes).decode("utf-8")
+    pdf_display = f"""
+    <iframe
+        src="data:application/pdf;base64,{b64}"
+        width="100%"
+        height="800px"
+        type="application/pdf">
+    </iframe>
+    """
+    st.components.v1.html(pdf_display, height=800)
 
 def reset_meet_state():
     keys_to_clear = [
@@ -151,6 +165,8 @@ if generate and "meet" in st.session_state:
     st.session_state["html"] = html
     st.session_state["pdf"] = pdf
     st.session_state["favorite_entries"] = favorite_entries
+
+    show_pdf_preview(pdf)
     
 # -------------------------
 # ALWAYS RENDER OUTPUT (KEY FIX)
