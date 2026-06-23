@@ -172,34 +172,41 @@ if generate and "meet" in st.session_state:
 # -------------------------
 # ALWAYS RENDER OUTPUT (KEY FIX)
 # -------------------------
-
 if "html" in st.session_state:
-    
+
     meet = st.session_state.get("meet")
     favorite_entries = st.session_state.get("favorite_entries", {})
 
-    st.download_button(
-        "Download HTML",
-        st.session_state["html"],
-        key="download_html"
-    )
+    col1, col2, col3 = st.columns([3,3,6], gap="small")
 
-    st.download_button(
-        "Download Meet Heat Sheet PDF",
-        st.session_state["pdf"],
-        file_name=f"{meet.name}_heatsheet.pdf",
-        key="download_pdf"
-    )
-
-    if favorite_entries and len(favorite_entries) > 0:
-        pdf_bytes = generate_favorite_pdf(meet, favorite_entries)
-
+    with col1:
         st.download_button(
-            "📄 Download Favorite Swimmers Heat Sheet PDF",
-            data=pdf_bytes,
-            file_name=f"{meet.name}_favorites.pdf",
-            mime="application/pdf"
+            "Download HTML",
+            st.session_state["html"],
+            file_name=f"{meet.name}_heatsheet.html",
+            key="download_html"
         )
+
+    with col2:
+        st.download_button(
+            "Download Meet Heat Sheet PDF",
+            st.session_state["pdf"],
+            file_name=f"{meet.name}_heatsheet.pdf",
+            key="download_pdf"
+        )
+
+    with col3:
+        if favorite_entries and len(favorite_entries) > 0:
+            pdf_bytes = generate_favorite_pdf(meet, favorite_entries)
+
+            st.download_button(
+                "📄 Download Favorite Swimmers Heat Sheet PDF",
+                data=pdf_bytes,
+                file_name=f"{meet.name}_favorites.pdf",
+                mime="application/pdf"
+            )
+        else:
+            st.write("")  # keeps layout aligned
 
     st.components.v1.html(
         st.session_state["html"],
