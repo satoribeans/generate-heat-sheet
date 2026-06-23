@@ -86,6 +86,9 @@ def generate_html_preview(meet, favorites):
 
             for lane in sorted_lanes:
                 entry = lane.entry
+                if not entry:
+                    continue
+                    
                 swimmer = entry.swimmer
 
                 is_favorite = swimmer.name in favorite_entries
@@ -139,12 +142,6 @@ def generate_html_preview(meet, favorites):
             h3 {{
                 margin-top: 15px;
                 margin-bottom: 5px;
-            }}
-
-            .table-wrapper {{
-                overflow-x: auto;
-                -webkit-overflow-scrolling: touch;
-                margin-bottom: 20px;
             }}
                   
             .heat-table,
@@ -238,38 +235,37 @@ def generate_html_preview(meet, favorites):
 
             /* Mobile support */
 
-        @media (max-width: 768px) {
-        
-            body {
-                margin: 8px;
+            @media (max-width: 768px) {
+                body {
+                    margin: 8px;
+                }
+            
+                h1 {
+                    font-size: 1.5rem;
+                }
+            
+                h2 {
+                    font-size: 1.2rem;
+                }
+            
+                h3 {
+                    font-size: 1rem;
+                }
+            
+                .heat-table,
+                .fav-swimmer-table {
+                    display: block;
+                    overflow-x: auto;
+                    max-width: 100%;
+                }
+            
+                .heat-table th,
+                .heat-table td,
+                .fav-swimmer-table th,
+                .fav-swimmer-table td {
+                    font-size: 13px;
+                }
             }
-        
-            h1 {
-                font-size: 1.5rem;
-            }
-        
-            h2 {
-                font-size: 1.2rem;
-            }
-        
-            h3 {
-                font-size: 1rem;
-            }
-        
-            .heat-table,
-            .fav-swimmer-table {
-                display: block;
-                overflow-x: auto;
-                max-width: 100%;
-            }
-        
-            .heat-table th,
-            .heat-table td,
-            .fav-swimmer-table th,
-            .fav-swimmer-table td {
-                font-size: 13px;
-            }
-        }
                   
         </style>
     </head>
