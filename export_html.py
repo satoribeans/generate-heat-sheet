@@ -22,7 +22,7 @@ def favorite_swimmers_html(favorites):
             <tr>
                 <td>{entry.event.event_number}</td>
                 <td>{escape(entry.event.name)}</td>
-                <td>{entry.heat_number}</td>
+                <td>{entry.heat_number} of {len(entry.event.heats)}</td>
                 <td>{entry.lane_number}</td>
                 <td>{entry.entry_time}</td>
             </tr>
