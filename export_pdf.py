@@ -97,8 +97,8 @@ def generate_pdf(meet, favorites_entries):
             pdf.set_font("DejaVu", "B", 10)
             pdf.cell(20, 6, "", 0, 0)  # indent
             pdf.cell(15, 6, "Event", 1, 0, "C")
-            pdf.cell(100, 6, "Event Name", 1, 0, "C")
-            pdf.cell(15, 6, "Heat", 1, 0,"C")
+            pdf.cell(95, 6, "Event Name", 1, 0, "C")
+            pdf.cell(20, 6, "Heat", 1, 0,"C")
             pdf.cell(15, 6, "Lane", 1, 0, "C")
             pdf.cell(20, 6, "Time", 1, 1, "C")
             # Rows under swimmer
