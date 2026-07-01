@@ -35,6 +35,12 @@ def favorite_swimmers_html(favorites):
 
 def generate_html_preview(meet, favorites):
     favorite_entries = meet.favorite_entries(favorites)
+    favorite_names = set(favorite_entries)
+    favorite_event_numbers = {
+        entry.event.event_number
+        for entries in favorite_entries.values()
+        for entry in entries
+    }
 
     rows = []
 
@@ -71,16 +77,7 @@ def generate_html_preview(meet, favorites):
     # Events
     # ==================
     for event in meet.events:
-
-        # detect if event contains favorite swimmer
-        event_has_favorite = False
-
-        for heat in event.heats:
-            for lane in heat.lanes:
-                entry = lane.entry
-                if entry and entry.swimmer.name in favorite_entries:
-                    event_has_favorite = True
-                    break
+        event_has_favorite = event.event_number in favorite_event_numbers
 
         rows.append(f"""
         <details class="event-block" {'open' if event_has_favorite else ''}>
@@ -121,7 +118,7 @@ def generate_html_preview(meet, favorites):
                     continue
 
                 swimmer = entry.swimmer
-                is_favorite = swimmer.name in favorite_entries
+                is_favorite = swimmer.name in favorite_names
 
                 name = escape(swimmer.name)
                 team = escape(swimmer.team)
