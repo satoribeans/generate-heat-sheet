@@ -1,13 +1,22 @@
 from models import Heat, Lane, Meet
-from utils import time_to_seconds, is_long_event
+from utils import is_long_event
 from collections import defaultdict
-
 
 
 # --------------------------------------
 # Heat assignment (circle seeding style)
 # --------------------------------------
-def seed_event(entries, lane_count=8, reverse_heats=True):
+def _is_prelim_event(event_name: str) -> bool:
+    name = event_name.lower()
+    return "prelim" in name or "preliminary" in name
+
+
+def seed_event(
+    entries,
+    lane_count=8,
+    reverse_heats=True,
+    prelim_circle_top_n_heats=1,
+):
     if not entries:
         return []
 
@@ -44,6 +53,75 @@ def seed_event(entries, lane_count=8, reverse_heats=True):
 
     final_heats = []
 
+    # USA swimming age group circle seeding rules for prelims:
+    # default n=3
+    # lane 4  5  3   6  2  7  1  8
+    #------------------------------
+    # seed 1  4  7  10 13 16 19 22
+    # seed 2  5  8  11 14 17 20 23
+    # seed 3  6  9  12 15 18 21 24
+    #
+    if prelim_circle_top_n_heats > 1:
+        num_circle_heats = min(prelim_circle_top_n_heats, len(heats_entries))
+        # Heat 1 is slowest and last heat is fastest when reverse_heats=True.
+        # Circle-seed the fastest N heats as requested.
+        top_heat_start = len(heats_entries) - num_circle_heats
+        top_heat_indices = list(range(top_heat_start, len(heats_entries)))
+
+        heat_lane_map = defaultdict(list)
+
+        # Keep standard per-heat seeding for all non-circle-seeded heats.
+        for heat_idx in range(top_heat_start):
+            heat_num = heat_idx + 1
+            heat_entries = heats_entries[heat_idx]
+
+            for idx, entry in enumerate(heat_entries):
+                lane_num = lane_order[idx]
+                entry.heat_number = heat_num
+                entry.lane_number = lane_num
+                heat_lane_map[heat_idx].append(
+                    Lane(lane_number=lane_num, entry=entry)
+                )
+
+        # Collect top-heat entries from fastest heat -> slower heat.
+        circle_entries = []
+        for heat_idx in reversed(top_heat_indices):
+            circle_entries.extend(heats_entries[heat_idx])
+
+        circle_ptr = 0
+        # True cross-heat circle seeding across the top heats.
+        # Seeds 1..N go to lane 4 (or lane 5 for 10-lane) across fastest->slower top heats,
+        # then continue outward by lane order.
+        for lane_idx, lane_num in enumerate(lane_order):
+            for heat_idx in reversed(top_heat_indices):
+                # This heat has no swimmer for this lane position.
+                if lane_idx >= len(heats_entries[heat_idx]):
+                    continue
+                if circle_ptr >= len(circle_entries):
+                    break
+
+                entry = circle_entries[circle_ptr]
+                circle_ptr += 1
+
+                entry.heat_number = heat_idx + 1
+                entry.lane_number = lane_num
+                heat_lane_map[heat_idx].append(
+                    Lane(lane_number=lane_num, entry=entry)
+                )
+
+        for heat_idx in range(len(heats_entries)):
+            final_heats.append(
+                Heat(
+                    heat_number=heat_idx + 1,
+                    lanes=sorted(
+                        heat_lane_map[heat_idx],
+                        key=lambda lane: lane.lane_number,
+                    ),
+                )
+            )
+
+        return final_heats
+
     for heat_num, heat_entries in enumerate(
         heats_entries,
         start=1
@@ -65,7 +143,7 @@ def seed_event(entries, lane_count=8, reverse_heats=True):
 
         final_heats.append(
             Heat(
-                heat_number= entry.heat_number,
+                heat_number=heat_num,
                 lanes = heat_lanes
             )
         )
@@ -83,12 +161,21 @@ def build_heat_sheet(meet) -> Meet:
     for event in meet.events:
         reverse_heats = True
         entries = event.entries
+        prelim_circle_top_n_heats = meet.settings.circle_seed_top_n_heats
+
+        if _is_prelim_event(event.name) and meet.settings.enable_prelim_circle_seeding:
+            prelim_circle_top_n_heats = meet.settings.circle_seed_top_n_heats
 
         if is_long_event(event.name.lower()) and order == "fast_to_slow":
             reverse_heats = False
 
         # generate heats, return list[Heat]
-        heats = seed_event(entries, lanes, reverse_heats)
+        heats = seed_event(
+            entries,
+            lanes,
+            reverse_heats,
+            prelim_circle_top_n_heats,
+        )
         # attach to event model
         event.heats = heats
 
