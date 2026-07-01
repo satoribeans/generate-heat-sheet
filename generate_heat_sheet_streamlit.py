@@ -10,9 +10,22 @@ from seeding import build_heat_sheet
 from utils import extract_meet_title
 
 
-@st.cache_data
-def build_favorite_pdf(meet_id, favorite_entries):
-    return generate_favorite_pdf(meet_id, favorite_entries)
+def layout_generation_key(
+    last_file_id,
+    lanes,
+    distance_event_order,
+    enable_prelim_circle_seeding,
+):
+    return (
+        last_file_id,
+        lanes,
+        distance_event_order,
+        enable_prelim_circle_seeding,
+    )
+
+
+def favorites_generation_key(favorites):
+    return tuple(sorted(favorites))
 
 
 def show_pdf_preview(pdf_bytes):
@@ -35,14 +48,15 @@ def reset_meet_state():
         "favorites",
         "html",
         "pdf",
+        "favorite_pdf",
+        "favorite_entries",
+        "layout_generation_key",
+        "favorites_generation_key",
     ]
 
     for k in keys_to_clear:
         if k in st.session_state:
             del st.session_state[k]
-
-    # clear cached functions (important)
-    build_favorite_pdf.clear()
 
 st.set_page_config(layout="wide")
 st.title("🏊 Heat Sheet Generator")
@@ -57,14 +71,20 @@ lanes = st.sidebar.selectbox(
     index=0
 )
 
-# disable for now
-# circle_seed_top_n_heats = st.sidebar.number_input(
-#     "Circle Seed Top N Heats",
-#     min_value=1,
-#     max_value=10,
-#     value=1,
-#     step=1
-# )
+# default to n=3 for prelims
+circle_seed_top_n_heats = st.sidebar.number_input(
+    "Circle Seed Top N Heats",
+    min_value=1,
+    max_value=10,
+    value=3,
+    step=1
+)
+
+enable_prelim_circle_seeding = st.sidebar.checkbox(
+    "Enable Prelim Circle Seeding",
+    value=True,
+    help="When enabled, prelim events use circle seeding across the fastest 3 heats.",
+)
 
 distance_event_order = st.sidebar.selectbox(
     "Long Distance Event Heat Order",
@@ -142,29 +162,50 @@ generate = st.button("Generate Heat Sheet")
 if generate and "meet" in st.session_state:
 
     meet = st.session_state["meet"]
-    meet_title = st.session_state["meet_title"]
-
-    # getting the current meet settings
-    settings = MeetSettings(
-        lanes=lanes,
-        circle_seed_top_n_heats=1, # default to 1
-        distance_event_order=distance_event_order
-    )
-    meet.settings = settings
-
-    # Generate heat sheet and update session state
-    meet = build_heat_sheet(meet)
-    st.session_state["meet"] = meet
 
     favorites = set(st.session_state.get("favorites", []))
-    favorite_entries = meet.favorite_entries(favorites)
+    current_layout_key = layout_generation_key(
+        st.session_state.get("last_file_id"),
+        lanes,
+        distance_event_order,
+        enable_prelim_circle_seeding,
+    )
+    current_favorites_key = favorites_generation_key(favorites)
 
-    html = generate_html_preview(meet, favorites)
-    pdf = generate_pdf(meet, favorite_entries)
+    layout_changed = st.session_state.get("layout_generation_key") != current_layout_key
+    favorites_changed = (
+        st.session_state.get("favorites_generation_key") != current_favorites_key
+    )
 
-    st.session_state["html"] = html
-    st.session_state["pdf"] = pdf
-    st.session_state["favorite_entries"] = favorite_entries
+    if layout_changed:
+        # getting the current meet settings
+        settings = MeetSettings(
+            lanes=lanes,
+            enable_prelim_circle_seeding=enable_prelim_circle_seeding,
+            circle_seed_top_n_heats=circle_seed_top_n_heats, # default to 3 for prelims
+            distance_event_order=distance_event_order
+        )
+        meet.settings = settings
+
+        # Generate heat sheet and update session state
+        meet = build_heat_sheet(meet)
+        st.session_state["meet"] = meet
+
+    if layout_changed or favorites_changed:
+
+        favorite_entries = meet.favorite_entries(favorites)
+
+        html = generate_html_preview(meet, favorites)
+        pdf = generate_pdf(meet, favorite_entries)
+
+        st.session_state["html"] = html
+        st.session_state["pdf"] = pdf
+        st.session_state["favorite_entries"] = favorite_entries
+        # Build favorite PDF only when user clicks its download button.
+        st.session_state["favorite_pdf"] = None
+
+    st.session_state["layout_generation_key"] = current_layout_key
+    st.session_state["favorites_generation_key"] = current_favorites_key
 
     # PDF preview - blocked by chrome
     # show_pdf_preview(pdf)
@@ -197,7 +238,11 @@ if "html" in st.session_state:
 
     with col3:
         if favorite_entries and len(favorite_entries) > 0:
-            pdf_bytes = generate_favorite_pdf(meet, favorite_entries)
+            pdf_bytes = st.session_state.get("favorite_pdf")
+
+            if pdf_bytes is None:
+                pdf_bytes = generate_favorite_pdf(meet, favorite_entries)
+                st.session_state["favorite_pdf"] = pdf_bytes
 
             st.download_button(
                 "📄 Download Favorite Swimmers Heat Sheet PDF",
