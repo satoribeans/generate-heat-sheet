@@ -83,7 +83,7 @@ circle_seed_top_n_heats = st.sidebar.number_input(
 enable_prelim_circle_seeding = st.sidebar.checkbox(
     "Enable Prelim Circle Seeding",
     value=True,
-    help="When enabled, prelim events use circle seeding across the fastest 3 heats.",
+    help="When enabled, prelim events use circle seeding across the fastest N heats set above (default to the top 3 heats).",
 )
 
 distance_event_order = st.sidebar.selectbox(
