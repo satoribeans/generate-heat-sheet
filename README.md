@@ -22,7 +22,7 @@
    # MacOS: Activate the virtual environment
    source .venv/bin/activate
 
-  pip install streamlit pypdf fpdf2
+   pip install streamlit pypdf fpdf2
   ```
 - Ensure DejaVu Sans fonts are available at `fonts/DejaVuSans.ttf` and `fonts/DejaVuSans-Bold.ttf` for PDF generation, or install DejaVu on your system.
 
