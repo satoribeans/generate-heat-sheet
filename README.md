@@ -16,6 +16,12 @@
 - Python 3.7+ and pip
 - Install dependencies:
   ```bash
+   # MacOS: Create a virtual environment named .venv
+   python3 -m venv .venv
+   
+   # MacOS: Activate the virtual environment
+   source .venv/bin/activate
+
   pip install streamlit pypdf fpdf2
   ```
 - Ensure DejaVu Sans fonts are available at `fonts/DejaVuSans.ttf` and `fonts/DejaVuSans-Bold.ttf` for PDF generation, or install DejaVu on your system.
