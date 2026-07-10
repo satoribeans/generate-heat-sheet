@@ -10,6 +10,8 @@ def parse_psych_sheet(text):
 
     event_re = re.compile(r'(?:Event\s+|#)(\d+)\s+(.*)')
     gender_header_re = re.compile(r'^(W\d+|M\d+)\s*&?\s*Under', re.IGNORECASE)
+    # metadata_re = re.compile(r'^[A-Za-z][A-Za-z /()-]*:\s*')
+    metadata_re = re.compile(r'^[A-Za-z][^:]{0,80}:')
 
     current_event = None
     current_gender = None
@@ -48,6 +50,13 @@ def parse_psych_sheet(text):
             continue
 
         if not current_event:
+            continue
+
+        # Skip metadata lines such as:
+        #   Meet qualifying: 23.50
+        #   Meet record: 55.12
+        #   Pool record: 54.87
+        if metadata_re.match(line):
             continue
 
         # -------------------------
