@@ -18,6 +18,7 @@ def parse_psych_sheet(text):
 
     for line in text.splitlines():
         line = clean_line(line)
+        print(repr(line))
         if not line:
             continue
 
