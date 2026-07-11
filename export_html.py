@@ -226,7 +226,7 @@ def generate_html_preview(meet, favorites):
 
             .heat-table th:nth-child(2),
             .heat-table td:nth-child(2) {{
-                width: 280px;
+                width: 250px;
             }}
 
             .heat-table th:nth-child(3),
@@ -237,7 +237,7 @@ def generate_html_preview(meet, favorites):
 
             .heat-table th:nth-child(4),
             .heat-table td:nth-child(4) {{
-                width: 120px;
+                width: 200px;
             }}
 
             .heat-table th:nth-child(5),

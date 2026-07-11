@@ -1,7 +1,6 @@
-from models import Heat, Lane, Meet
-from utils import is_long_event
+from models import Heat, Lane, Meet, Event, Entry
+from utils import is_long_event, is_400_free_event, is_400_im_event, get_age_group
 from collections import defaultdict
-
 
 # --------------------------------------
 # Heat assignment (circle seeding style)
@@ -10,7 +9,9 @@ def _is_prelim_event(event_name: str) -> bool:
     name = event_name.lower()
     return "prelim" in name or "preliminary" in name
 
-
+# ----------------------------------------------
+# Generate heat sheet for each individual event
+# ----------------------------------------------
 def seed_event(
     entries,
     lane_count=8,
@@ -169,6 +170,10 @@ def build_heat_sheet(meet) -> Meet:
 
         if is_long_event(event.name.lower()) and order == "fast_to_slow":
             reverse_heats = False
+        elif is_400_free_event(event.name.lower()) and meet.settings.four_free_event_order == "fast_to_slow":
+            reverse_heats = False
+        elif is_400_im_event(event.name.lower()) and meet.settings.four_im_additional_event_order == "fast_to_slow":
+            reverse_heats = False
 
         # generate heats, return list[Heat]
         heats = seed_event(
@@ -177,7 +182,28 @@ def build_heat_sheet(meet) -> Meet:
             reverse_heats,
             prelim_circle_top_n_heats,
         )
-        # attach to event model
+
+        if is_400_im_event(event.name.lower()):
+            if get_age_group(event.name) == "11-12" and meet.settings.four_im_top_n_heats_11_12 > 1:
+                if meet.settings.four_im_additional_event_order == "fast_to_slow" and meet.settings.four_im_top_n_event_order_11_12 == "slow_to_fast":
+                    n = meet.settings.four_im_top_n_heats_11_12
+                    heats = heats[:n][::-1]+heats[n:]
+                    for i, h in enumerate(heats, start=1):
+                        h.heat_number = i
+                        for l in h.lanes:
+                            if l.entry:
+                                l.entry.heat_number = i
+            elif get_age_group(event.name) == "13-14" and meet.settings.four_im_top_n_heats_13_14 > 1:
+                if meet.settings.four_im_additional_event_order == "fast_to_slow" and meet.settings.four_im_top_n_event_order_13_14 == "slow_to_fast":
+                    n = meet.settings.four_im_top_n_heats_13_14
+                    heats = heats[:n][::-1]+heats[n:]
+                    for i, h in enumerate(heats, start=1):
+                        h.heat_number = i
+                        for l in h.lanes:
+                            if l.entry:
+                                l.entry.heat_number = i
+
+        # attach heats to the event model
         event.heats = heats
 
     return meet

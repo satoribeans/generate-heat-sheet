@@ -42,10 +42,50 @@ def clean_line(line):
             .strip()
     )
 
-
 def is_long_event(name):
     name = name.lower()
-    return any(x in name for x in ["400", "500", "800", "1000", "1500", "1650"])
+    return any(x in name for x in ["500", "800", "1000", "1500", "1650"])
+
+def is_400_free_event(name):
+    name = name.lower()
+    # return "400" in name and "free" in name
+    return bool(re.search(r'\b400\b.*\bfree(style)?\b', name, re.IGNORECASE))
+
+def is_400_im_event(name):
+    return bool(
+        re.search(
+            r'\b400\b.*\b(im|individual\s+medley)\b',
+            name,
+            re.IGNORECASE
+        )
+    )
+# -----------------------------------------
+# get_age_group("Women 11-12 400 IM")
+# # '11-12'
+#
+# get_age_group("Girls 10&Under 50 Free")
+# # '10&Under'
+#
+# get_age_group("Boys 13-14 200 Fly")
+# # '13-14'
+#
+# get_age_group("Men Open 1500 Free")
+# # 'Open'
+# -----------------------------------------
+def get_age_group(name):
+    m = re.search(r'\b(\d{1,2}\s*-\s*\d{1,2}|\d{1,2}\s*&\s*Under|Open)\b',
+                  name, re.IGNORECASE)
+    return m.group(1) if m else None
+
+def get_gender(name):
+    m = re.search(r'\b(women|woman|girls?|men|man|boys?)\b', name, re.IGNORECASE)
+    if not m:
+        return None
+
+    word = m.group(1).lower()
+    if word.startswith(("w", "g")):
+        return "Girls"
+    return "Boys"
 
 # ==========================================================
 # TITLE EXTRACTION

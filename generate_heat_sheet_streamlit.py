@@ -66,6 +66,7 @@ st.title("🏊 Heat Sheet Generator")
 # --------------------------------------------------
 #  Always Show Meet Settings
 # --------------------------------------------------
+
 st.sidebar.header("Meet Settings")
 lanes = st.sidebar.selectbox(
     "Lanes per Heat",
@@ -75,7 +76,7 @@ lanes = st.sidebar.selectbox(
 
 # default to n=3 for prelims
 circle_seed_top_n_heats = st.sidebar.number_input(
-    "Circle Seed Top N Heats",
+    "Number of Top Heats for Circle Seeding",
     min_value=1,
     max_value=10,
     value=3,
@@ -88,21 +89,89 @@ enable_prelim_circle_seeding = st.sidebar.checkbox(
     help="When enabled, prelim events use circle seeding across the fastest N heats set above (default to the top 3 heats).",
 )
 
-distance_event_order = st.sidebar.selectbox(
+long_distance_event_order = st.sidebar.selectbox(
     "Long Distance Event Heat Order",
     options=["Fast to Slow", "Slow to Fast"],
     index=0
 )
 
-distance_event_order = {
-    "Fast to Slow": "fast_to_slow",
-    "Slow to Fast": "slow_to_fast"
-}[distance_event_order]
-
 st.sidebar.caption(
-    "Only used for long-distance events. "
+    "Only used for long-distance (>400) events. "
     "All other events use standard seeding."
 )
+
+st.sidebar.header(
+    "400 Freestyle Heats"
+)
+four_free_event_order = st.sidebar.selectbox(
+    "400 Freestyle Heats Order",
+    options=["Fast to Slow", "Slow to Fast"],
+    index=1
+)
+
+st.sidebar.header("400 IM Heats")
+
+four_im_additional_event_order = st.sidebar.selectbox(
+    "400 IM Event (Additional) Heats Order",
+    options=["Fast to Slow", "Slow to Fast"],
+    index=0
+)
+
+st.sidebar.subheader("400 IM Top Heats by Age Groups")
+four_im_top_n_heats_11_12 = st.sidebar.number_input(
+    "Number of Top Heats for 11-12",
+    min_value=1,
+    max_value=3,
+    value=3,
+    step=1
+)
+
+four_im_top_n_event_order_11_12 = st.sidebar.selectbox(
+    "11-12 400 IM Event Top N Heats Order",
+    options=["Fast to Slow", "Slow to Fast"],
+    index=1
+)
+
+# st.sidebar.divider()
+
+four_im_top_n_heats_13_14 = st.sidebar.number_input(
+    "Number of Top Heats for 13-14",
+    min_value=1,
+    max_value=4,
+    value=4,
+    step=1
+)
+
+four_im_top_n_event_order_13_14 = st.sidebar.selectbox(
+    "13-14 400 IM Event Top N Heats Order",
+    options=["Fast to Slow", "Slow to Fast"],
+    index=1
+)
+
+long_distance_event_order = {
+    "Fast to Slow": "fast_to_slow",
+    "Slow to Fast": "slow_to_fast"
+}[long_distance_event_order]
+
+four_free_event_order = {
+    "Fast to Slow": "fast_to_slow",
+    "Slow to Fast": "slow_to_fast"
+}[four_free_event_order]
+
+four_im_top_n_event_order_11_12 = {
+    "Fast to Slow": "fast_to_slow",
+    "Slow to Fast": "slow_to_fast"
+}[four_im_top_n_event_order_11_12]
+
+four_im_top_n_event_order_13_14 = {
+    "Fast to Slow": "fast_to_slow",
+    "Slow to Fast": "slow_to_fast"
+}[four_im_top_n_event_order_13_14]
+
+four_im_additional_event_order = {
+    "Fast to Slow": "fast_to_slow",
+    "Slow to Fast": "slow_to_fast"
+}[four_im_additional_event_order]
 
 col1, col2 = st.columns([1, 4])
 with col1:
@@ -169,7 +238,7 @@ if generate and "meet" in st.session_state:
     current_layout_key = layout_generation_key(
         st.session_state.get("last_file_id"),
         lanes,
-        distance_event_order,
+        long_distance_event_order,
         enable_prelim_circle_seeding,
     )
     current_favorites_key = favorites_generation_key(favorites)
@@ -185,7 +254,13 @@ if generate and "meet" in st.session_state:
             lanes=lanes,
             enable_prelim_circle_seeding=enable_prelim_circle_seeding,
             circle_seed_top_n_heats=circle_seed_top_n_heats, # default to 3 for prelims
-            distance_event_order=distance_event_order
+            distance_event_order=long_distance_event_order,
+            four_free_event_order=four_free_event_order,
+            four_im_top_n_heats_11_12=four_im_top_n_heats_11_12,
+            four_im_top_n_event_order_11_12=four_im_top_n_event_order_11_12,
+            four_im_top_n_heats_13_14=four_im_top_n_heats_13_14,
+            four_im_top_n_event_order_13_14=four_im_top_n_event_order_13_14,
+            four_im_additional_event_order=four_im_additional_event_order,
         )
         meet.settings = settings
 

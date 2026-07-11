@@ -58,6 +58,12 @@ from collections import defaultdict
 #  ├── lanes
 #  ├── circle_seed_top_n_heats
 #  ├── distance_event_order
+#  ├── mid_distance_free_event_order
+#  ├── mid_distance_im_top_n_heats_11_12
+#  ├── mid_distance_im_top_n_event_order_11_12
+#  ├── mid_distance_im_top_n_heats_13_14
+#  ├── mid_distance_im_top_n_event_order_13_14
+#  ├── mid_distance_im_additional_event_order
 #  └── long_distance_events
 # ----------------------------------------
 
@@ -73,6 +79,14 @@ class MeetSettings:
     long_distance_events: set[int] = field(
         default_factory=set
     )
+    # 400 Free
+    four_free_event_order: str = "slow_to_fast" # or "fast_to_slow
+    # 400 IM per age group
+    four_im_top_n_heats_11_12: int = 3
+    four_im_top_n_heats_13_14: int = 4
+    four_im_top_n_event_order_11_12: str = "slow_to_fast" # or "fast_to_slow
+    four_im_top_n_event_order_13_14: str = "slow_to_fast" # or "fast_to_slow
+    four_im_additional_event_order: str = "fast_to_slow" # or slow_to_fast
 
 # --------------------------------------------------
 # Swimmer

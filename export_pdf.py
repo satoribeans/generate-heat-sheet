@@ -60,7 +60,13 @@ class PDF(FPDF):
             self.cell(5, 5, str(lane.lane_number), 0, 0, "C")
             self.cell(40, 5, swimmer.name[:22], 0, 0, "L")
             self.cell(10, 5, str(swimmer.age), 0, 0, "C")
-            self.cell(15, 5, swimmer.team[:8], 0, 0, "L")
+
+            # Smaller font for team
+            self.set_font("DejaVu", "", 7)
+            self.cell(20, 5, swimmer.team, 0, 0, "L")
+
+            # Restore normal font
+            self.set_font("DejaVu", "", 9)
             self.cell(20, 5, entry.entry_time, 0, 1, "R")
         return self.get_y()
 
