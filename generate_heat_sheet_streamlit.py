@@ -9,6 +9,8 @@ from parser import parse_psych_sheet
 from seeding import build_heat_sheet
 from utils import extract_meet_title
 
+if st.button("Clear Data Cache"):
+    st.cache_data.clear()
 
 def layout_generation_key(
     last_file_id,
