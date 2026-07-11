@@ -161,7 +161,8 @@ def build_heat_sheet(meet) -> Meet:
     for event in meet.events:
         reverse_heats = True
         entries = event.entries
-        prelim_circle_top_n_heats = meet.settings.circle_seed_top_n_heats
+        # default to 1 to disable circle seeding
+        prelim_circle_top_n_heats = 1
 
         if _is_prelim_event(event.name) and meet.settings.enable_prelim_circle_seeding:
             prelim_circle_top_n_heats = meet.settings.circle_seed_top_n_heats
