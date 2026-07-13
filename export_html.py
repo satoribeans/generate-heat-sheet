@@ -259,7 +259,7 @@ def generate_html_preview(meet, favorites):
 
             .fav-swimmer-table th:nth-child(3),
             .fav-swimmer-table td:nth-child(3) {{
-                width: 50px;
+                width: 100px;
                 text-align: center;
             }}
 
