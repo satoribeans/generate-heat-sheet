@@ -47,6 +47,11 @@ def seed_event(
         heats_entries.append(remaining[:count])
         remaining = remaining[count:]
 
+    # If the slowest heat has 1 swimmer, move last 2 swimmers from the previous heat over
+    if len(heats_entries) >= 2 and len(heats_entries[-1]) == 1:
+        heats_entries[-1] = heats_entries[-2][-2:] + heats_entries[-1]
+        heats_entries[-2] = heats_entries[-2][:-2]
+
     # Heat 1 = slowest heat
     # Last heat = fastest heat
     if reverse_heats:

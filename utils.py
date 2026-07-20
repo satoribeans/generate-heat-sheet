@@ -48,10 +48,20 @@ def is_long_event(name):
 
 def is_400_free_event(name):
     name = name.lower()
+
+    # Exclude relay events
+    if "relay" in name:
+        return False
+
     # return "400" in name and "free" in name
     return bool(re.search(r'\b400\b.*\bfree(style)?\b', name, re.IGNORECASE))
 
 def is_400_im_event(name):
+
+    # Exclude relay events
+    if "relay" in name.lower():
+        return False
+
     return bool(
         re.search(
             r'\b400\b.*\b(im|individual\s+medley)\b',
