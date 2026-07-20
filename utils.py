@@ -44,6 +44,11 @@ def clean_line(line):
 
 def is_long_event(name):
     name = name.lower()
+
+    # Exclude relay events
+    if "relay" in name:
+        return False
+
     return any(x in name for x in ["500", "800", "1000", "1500", "1650"])
 
 def is_400_free_event(name):
@@ -69,6 +74,9 @@ def is_400_im_event(name):
             re.IGNORECASE
         )
     )
+
+def is_relay_event(name):
+    return "relay" in name.lower()
 # -----------------------------------------
 # get_age_group("Women 11-12 400 IM")
 # # '11-12'
