@@ -204,5 +204,3 @@ def format_team_name(team: str) -> str:
 
     # Exact mapping
     return TEAM_MAP.get(team, team)
-
-    return team
