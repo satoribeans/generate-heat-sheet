@@ -166,6 +166,7 @@ def parse_swimmer_line(line, current_event, current_gender):
             gender=current_gender or "",
             age=str(age).lstrip("WM"),
             team=team if 'team' in locals() else "",
+            team = format_team_name(team),
         )
 
         return Entry(
@@ -184,7 +185,7 @@ def parse_swimmer_line(line, current_event, current_gender):
             name=name.strip(),
             gender=current_gender or "",
             age=age,
-            team=team.strip(),
+            team=format_team_name(team.strip()),
         )
         return Entry(
             swimmer=swimmer,
