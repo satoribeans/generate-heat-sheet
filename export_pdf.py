@@ -72,7 +72,7 @@ class PDF(FPDF):
 
             # Smaller font for team
             self.set_font("DejaVu", "", 7)
-            self.cell(20, 5, swimmer.team, 0, 0, "L")
+            self.cell(20, 5, swimmer.team_code, 0, 0, "L")
 
             # Restore normal font
             self.set_font("DejaVu", "", 9)

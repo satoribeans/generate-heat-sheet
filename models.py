@@ -97,6 +97,7 @@ class Swimmer:
     gender: str
     age: int
     team: str
+    team_code: str
 
 # --------------------------------------------------
 # Entry

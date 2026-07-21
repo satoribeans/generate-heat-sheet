@@ -121,7 +121,7 @@ def generate_html_preview(meet, favorites):
                 is_favorite = swimmer.name in favorite_names
 
                 name = escape(swimmer.name)
-                team = escape(swimmer.team)
+                team = escape(swimmer.team_code)
 
                 rows.append(f"""
                 <tr class="{'favorite' if is_favorite else ''}">

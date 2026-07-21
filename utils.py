@@ -171,17 +171,48 @@ def extract_meet_title(text):
 # NORMALIZE TEAM NAMES
 # ==========================================================
 
-TEAM_MAP = {
-    "Old North State": "ONSA-NC",
+TEAM_NAME_MAP = {
+    "Aquatic Team Of" :  "ATOM-NC",
+    "Asheville Jewish": "AJCC-NC",
+    "Carolina Aquatic": "CAT-NC",
+    "Catawba Valley A": "CVAC-NC",
+    "Crystal Coast Aq": "CCA-NC",
+    "East Carolina Aq": "ECA-NC",
+    "Enfinity Aquatic": "EAC-NC",
+    "Gaston Gators"   : "GG-NC",
+    "Granite Falls Sw": "GFSC-NC",
+    "Greensboro Commu": "GCY-NC",
     "Greensboro Swimm": "GSA-NC",
-    "North Carolina A": "NCAC-NC",
-    "SwimMAC Carolina": "MAC-NC",
-    "Tac Titans": "TAC-NC",
-    "YMCA of the Tria": "YOTA",
+    "Hickory Foundati": "YSST-NC",
+    "Hillsborough Aqu": "HAC-NC",
+    "Life Time North" : "LIFE-NC",
     "Marlins Of Ralei": "MOR-NC",
+    "MCA of Northwes" : "TYDE-NC",
+    "MCA of the Tria" : "YOTA",
+    "MCA of Western"  :  "WNCY-NC",
+    "Mecklenburg Swim": "MSA-NC",
+    "New Wave Swim Te": "WAVE-NC",
+    "North Carolina A": "NCAC-NC",
+    "Nsea Swim"       : "NSEA-NC",
+    "O'Neal Aquatics" : "NEAL-NC",
+    "Old North State" : "ONSA-NC",
+    "Queen City Dolph": "QCD-NC",
+    "Raleigh Swimming": "RSA-NC",
+    "Sailfish Aquatic": "SAIL-NC",
+    "Star Aquatics"   : "STAR-NC",
+    "Streamline Aquat": "SAQ-NC",
+    "SwimMAC Carolina": "MAC-NC",
+    "Tac Titans"      : "TAC-NC",
+    "Team Charlotte S": "TEAM-NC",
+    "Unattached"      : "UN-NC",
+    "Watauga County S": "WST-NC",
+    "Waves Of Wilming": "WOW-NC",
+    "YMCA of Northwes": "TYDE-NC",
+    "YMCA of the Tria": "YOTA",
+    "YMCA of Western":  "WNCY-NC",
 }
 
-def format_team_name(team: str) -> str:
+def get_team_code(team: str) -> str:
     """
         Convert full/truncated team names from psych sheets
         into short heat sheet display names.
@@ -203,4 +234,4 @@ def format_team_name(team: str) -> str:
     team = " ".join(team.strip().split())
 
     # Exact mapping
-    return TEAM_MAP.get(team, team)
+    return TEAM_NAME_MAP.get(team, team)
