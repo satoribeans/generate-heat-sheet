@@ -27,23 +27,16 @@ class PDF(FPDF):
 
     def footer(self):
         self.set_y(-18)
-        self.set_font("DejaVu", "", 8)
+        self.set_font("DejaVu", "", 7)
     
         self.cell(
             0,
             3,
-            "For entertainment only — Generated from the uploaded psych sheet. "
-            "Swimmers with identical seed times are assigned according to their seed order. ",
+            "Unofficial heat sheet. Generated from the uploaded psych sheet. Ties follow psych sheet seed order. "
+            "Good luck, swimmers!                    Page {self.page_no()} of {{nb}}",
             new_x="LMARGIN",
             new_y="NEXT",
-            align="L",
-        )
-    
-        self.cell(
-            0,
-            3,
-            f"Official heat and lane assignments may differ. Good luck, swimmers!                                       Page {self.page_no()} of {{nb}}",
-            align="L",
+            align="C",
         )
 
     def print_event_header(self, event, x, y, width):
