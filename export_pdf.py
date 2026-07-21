@@ -11,7 +11,14 @@ class PDF(FPDF):
 
     def header(self):
         self.set_font("DejaVu", "B", 12)
+        # title in the center
         self.cell(0, 8, self.title, ln=1, align="C")
+
+        # Right side (same line)
+        self.set_xy(-35, 8)
+        self.set_font("DejaVu", "", 8)
+        self.cell(30, 5, f"Page {self.page_no()} of {{nb}}", align="R")
+        
         self.ln(2)
 
     # def footer(self):
@@ -31,7 +38,7 @@ class PDF(FPDF):
     
         self.cell(0, 3,
             "Unofficial heat sheet. Generated from the uploaded psych sheet. Ties follow psych sheet seed order. "
-            f"Good luck, swimmers! 🏊          Page {self.page_no()} of {{nb}}",
+            f"Good luck, swimmers! 🏊 ",
             new_x="LMARGIN",
             new_y="NEXT",
             align="C",
