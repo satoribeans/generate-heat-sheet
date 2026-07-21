@@ -14,16 +14,37 @@ class PDF(FPDF):
         self.cell(0, 8, self.title, ln=1, align="C")
         self.ln(2)
 
+    # def footer(self):
+    #     self.set_y(-15)  # <-- this is the key
+    #     self.set_font("DejaVu", "", 8)
+    #     footer_text = (
+    #         "For entertainment only - Generated from the uploaded psych sheet. Swimmers with identical seed times are assigned according \n "
+    #         "to their seed order. Official heat and lane assignments may differ. Good luck, swimmers!                                        "
+    #         f"Page {self.page_no()} of {{nb}}"
+    #     )
+    #     self.multi_cell(0, 3.5, footer_text, align="C")
+    #     self.ln(2)
+
     def footer(self):
-        self.set_y(-15)  # <-- this is the key
-        self.set_font("DejaVu", "", 8)
-        footer_text = (
-            "For entertainment only - Generated from the uploaded psych sheet. Swimmers with identical seed times are assigned according \n "
-            "to their seed order. Official heat and lane assignments may differ. Good luck, swimmers!                                        "
-            f"Page {self.page_no()} of {{nb}}"
-        )
-        self.multi_cell(0, 3.5, footer_text, align="C")
-        self.ln(2)
+    self.set_y(-18)
+    self.set_font("DejaVu", "", 8)
+
+    self.cell(
+        0,
+        3,
+        "For entertainment only — Generated from the uploaded psych sheet. "
+        "Swimmers with identical seed times are assigned according to their seed order. ",
+        new_x="LMARGIN",
+        new_y="NEXT",
+        align="L",
+    )
+
+    self.cell(
+        0,
+        3,
+        f"Official heat and lane assignments may differ. Good luck, swimmers!                                       Page {self.page_no()} of {{nb}}",
+        align="L",
+    )
 
     def print_event_header(self, event, x, y, width):
         self.set_xy(x, y)
