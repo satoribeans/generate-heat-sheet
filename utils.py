@@ -166,3 +166,43 @@ def extract_meet_title(text):
 
     return title
     # return " - ".join(title_lines[:3]) if title_lines else "Swim Meet Heat Sheet"
+
+# ==========================================================
+# NORMALIZE TEAM NAMES
+# ==========================================================
+
+TEAM_MAP = {
+    "Old North State-NC": "ONSA-NC",
+    "Greensboro Swimm-NC": "GSA-NC",
+    "North Carolina A-NC": "NCAC-NC",
+    "SwimMAC Carolina-NC": "MAC-NC",
+    "Tac Titans-NC": "TAC-NC",
+    "YMCA of the Tria-NC": "YOTA",
+    "Marlins Of Ralei-NC": "MOR-NC",
+}
+
+def format_team_name(team: str) -> str:
+    """
+        Convert full/truncated team names from psych sheets
+        into short heat sheet display names.
+
+        Examples:
+            Old North State-NC       -> ONSA-NC
+            Greensboro Swimm-NC      -> GSA-NC
+            North Carolina A-NC      -> NCAC-NC
+            SwimMAC Carolina-NC      -> MAC-NC
+            Tac Titans-NC            -> TAC-NC
+            YMCA of the Tria-NC      -> YOTA
+            Marlins Of Ralei-NC      -> MOR-NC
+        """
+
+    if not team:
+        return ""
+
+    # Normalize whitespace
+    team = " ".join(team.strip().split())
+
+    # Exact mapping
+    return TEAM_MAP.get(team, team)
+
+    return team
