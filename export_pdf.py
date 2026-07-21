@@ -33,8 +33,8 @@ class PDF(FPDF):
     #     self.ln(2)
 
     def footer(self):
-        self.set_y(-10) # <-- this is the key
-        self.set_font("DejaVu", "", 8)
+        self.set_y(-15) # <-- this is the key
+        self.set_font("DejaVu", "B", 8)
     
         self.cell(0, 3,
             "Unofficial heat sheet. Generated from the uploaded psych sheet. Ties follow psych sheet seed order. "
