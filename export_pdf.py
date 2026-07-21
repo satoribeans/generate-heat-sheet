@@ -33,7 +33,7 @@ class PDF(FPDF):
             0,
             3,
             "Unofficial heat sheet. Generated from the uploaded psych sheet. Ties follow psych sheet seed order. "
-            "Good luck, swimmers!                    Page {self.page_no()} of {{nb}}",
+            f"Good luck, swimmers!                         Page {self.page_no()} of {{nb}}",
             new_x="LMARGIN",
             new_y="NEXT",
             align="C",
