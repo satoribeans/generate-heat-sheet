@@ -19,7 +19,7 @@ class PDF(FPDF):
         self.set_font("DejaVu", "", 8)
         footer_text = (
             "For entertainment only - Generated from the uploaded psych sheet. Swimmers with identical seed times are assigned according \n "
-            "to their order in the psych sheet. Official heat and lane assignments may differ. Good luck, swimmers!  "
+            "to their seed order. Official heat and lane assignments may differ. Good luck, swimmers!                           "
             f"Page {self.page_no()} of {{nb}}"
         )
         self.multi_cell(0, 3.5, footer_text, align="C")
