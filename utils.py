@@ -172,13 +172,13 @@ def extract_meet_title(text):
 # ==========================================================
 
 TEAM_MAP = {
-    "Old North State-NC": "ONSA-NC",
-    "Greensboro Swimm-NC": "GSA-NC",
-    "North Carolina A-NC": "NCAC-NC",
-    "SwimMAC Carolina-NC": "MAC-NC",
-    "Tac Titans-NC": "TAC-NC",
-    "YMCA of the Tria-NC": "YOTA",
-    "Marlins Of Ralei-NC": "MOR-NC",
+    "Old North State": "ONSA-NC",
+    "Greensboro Swimm": "GSA-NC",
+    "North Carolina A": "NCAC-NC",
+    "SwimMAC Carolina": "MAC-NC",
+    "Tac Titans": "TAC-NC",
+    "YMCA of the Tria": "YOTA",
+    "Marlins Of Ralei": "MOR-NC",
 }
 
 def format_team_name(team: str) -> str:
@@ -187,13 +187,13 @@ def format_team_name(team: str) -> str:
         into short heat sheet display names.
 
         Examples:
-            Old North State-NC       -> ONSA-NC
-            Greensboro Swimm-NC      -> GSA-NC
-            North Carolina A-NC      -> NCAC-NC
-            SwimMAC Carolina-NC      -> MAC-NC
-            Tac Titans-NC            -> TAC-NC
-            YMCA of the Tria-NC      -> YOTA
-            Marlins Of Ralei-NC      -> MOR-NC
+            Old North State       -> ONSA-NC
+            Greensboro Swimm      -> GSA-NC
+            North Carolina A      -> NCAC-NC
+            SwimMAC Carolina      -> MAC-NC
+            Tac Titans            -> TAC-NC
+            YMCA of the Tria      -> YOTA
+            Marlins Of Ralei      -> MOR-NC
         """
 
     if not team:
