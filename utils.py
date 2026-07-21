@@ -199,14 +199,8 @@ def format_team_name(team: str) -> str:
     if not team:
         return ""
 
-    normalized = " ".join(team.split()).upper()
-    
     # Normalize whitespace
-    # team = " ".join(team.strip().split())
-    for prefix, short_name in TEAM_MAP.items():
-        if normalized.startswith(prefix):
-            return short_name
+    team = " ".join(team.strip().split())
 
     # Exact mapping
-    # return TEAM_MAP.get(team, team)
-    return team.strip()
+    return TEAM_MAP.get(team, team)
