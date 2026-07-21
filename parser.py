@@ -159,7 +159,7 @@ def parse_swimmer_line(line, current_event, current_gender):
         if not m:
             continue
 
-        print(f"following pattern: {pattern.pattern}")
+        # print(f"following pattern: {pattern.pattern}")
 
         # -------------------------
         # Pattern B (most common in meet manager exports)
@@ -179,7 +179,6 @@ def parse_swimmer_line(line, current_event, current_gender):
             age = m.group(4)
             name = m.group(5).strip()
             team = m.group(1)
-            print("pattern B")
 
         # -------------------------
         # Pattern C (rank-first layouts)
@@ -190,7 +189,6 @@ def parse_swimmer_line(line, current_event, current_gender):
             age = m.group(3)
             team = m.group(4)
             seed_time = m.group(5)
-            print("pattern C")
 
 
         # -------------------------
@@ -202,7 +200,6 @@ def parse_swimmer_line(line, current_event, current_gender):
             age = m.group(3)
             name = m.group(4).strip()
             team = m.group(1)
-            print("pattern A")
 
 
         swimmer = Swimmer(
