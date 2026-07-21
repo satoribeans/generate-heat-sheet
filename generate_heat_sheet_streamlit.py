@@ -148,6 +148,9 @@ four_im_top_n_event_order_13_14 = st.sidebar.selectbox(
     index=1
 )
 
+with st.sidebar:
+    st.info("💡 Note: Swimmers with identical seed times (ties) are assigned according to their order in the psych sheet. Official heat and lane assignments may differ if a different tie-breaking method is used.")
+
 long_distance_event_order = {
     "Fast to Slow": "fast_to_slow",
     "Slow to Fast": "slow_to_fast"
