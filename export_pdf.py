@@ -33,7 +33,7 @@ class PDF(FPDF):
     #     self.ln(2)
 
     def footer(self):
-        self.set_y(-18) # <-- this is the key
+        self.set_y(-10) # <-- this is the key
         self.set_font("DejaVu", "", 8)
     
         self.cell(0, 3,
