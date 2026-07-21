@@ -1,7 +1,7 @@
 import re
 
 from models import Entry, Swimmer, Event
-from utils import clean_line, format_team_name
+from utils import clean_line, get_team_code
 
 event_re = re.compile(r'(?:Event\s+|#)(\d+)\s+(.*)')
 gender_header_re = re.compile(r'^(W\d+|M\d+)\s*&?\s*Under', re.IGNORECASE)
@@ -94,7 +94,8 @@ def parse_swimmer_line(line, current_event, current_gender):
                 name=f"{team.strip()} {letter}",
                 gender=current_gender or "",
                 age="",
-                team=format_team_name(team.strip()),
+                team=team.strip(),
+                team_code=get_team_code(team.strip()),
             )
             return Entry(
                 swimmer=swimmer,
@@ -165,7 +166,8 @@ def parse_swimmer_line(line, current_event, current_gender):
             name=name,
             gender=current_gender or "",
             age=str(age).lstrip("WM"),
-            team=format_team_name(team) if 'team' in locals() else "",
+            team= team if 'team' in locals() else "",
+            team_code=get_team_code(team),
         )
 
         return Entry(
@@ -184,7 +186,8 @@ def parse_swimmer_line(line, current_event, current_gender):
             name=name.strip(),
             gender=current_gender or "",
             age=age,
-            team=format_team_name(team.strip()),
+            team=team.strip(),
+            team_code=get_team_code(team.strip()),
         )
         return Entry(
             swimmer=swimmer,
