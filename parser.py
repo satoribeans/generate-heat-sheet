@@ -78,6 +78,9 @@ def parse_psych_sheet(text):
         if metadata_re.match(line) or column_header_re.match(line):
             continue
 
+        #### debug only ####
+        # print(f"Parsing line: {line!r}")
+
         entry = parse_swimmer_line(line, current_event, current_gender)
         if entry:
             current_event.entries.append(entry)
@@ -114,33 +117,69 @@ def parse_swimmer_line(line, current_event, current_gender):
         r'^(\S+)\s+' + seed_time_pattern + r'\s+(\d+)\s+(.*?)\s+(\d+)$'
     )
 
-    # Pattern B (MOTH): TEAM SEED_TIME AGE_GENDER NAME RANK
+    # Pattern B (MOTH & NCSA): TEAM SEED_TIME AGE_GENDER NAME RANK
     # Example: NCAC-NC 2:03.56M21Whelehan, Colin H1 or NCAC-NC 3:56.29 18Huggins, Sam L1
     # Note: Sometimes gender prefix is missing and there might be no space after age
+    # swimmer_re_B = re.compile(
+    #     r'^(\S+)\s+' + seed_time_pattern + r'\s*([MW]?\d+|Boys|Girls)\s*(.*?)\s*(\d+)$'
+    # )
     swimmer_re_B = re.compile(
-        r'^(\S+)\s+' + seed_time_pattern + r'\s*([MW]?\d+|Boys|Girls)\s*(.*?)\s*(\d+)$'
+        r'^(\S+)\s+'  # team
+        + seed_time_pattern +  # time
+        r'([YL])?' +  # optional course: Y/L
+        r'\s*'
+        r'([MW]?\d+|Boys|Girls)\s*'  # age
+        r'(.*?)\s*'  # swimmer name
+        r'([A-Z]{1,5})?'  # optional standard: QT/J/O/TYR
+        r'(\d+)$'  # rank
     )
+
 
     # Pattern C (Alternative MOTH): RANK NAME AGE_GENDER TEAM SEED_TIME
     swimmer_re_C = re.compile(
         r'^(\d+)\s+(.*?)\s+([MW]?\d+|Boys|Girls)\s+(\S+)\s+' + seed_time_pattern + r'$'
     )
 
+    # Pattern D (LC AG Champs, NCSA) - National Club Swimming Association
+    # Examples:
+    # NTA-IL 23.91 14Liu-Tchorbadjiyski, Lubo J12
+    # TG-SC 24.14 16Bridges, Will QT20
+    # NCAP-PV 24.18 15Hanson, Gabe QT21
+    # swimmer_re_D = re.compile(
+    #     r'^(\S+)\s+'  # team
+    #     + seed_time_pattern +
+    #     r'\s*([MW]?\d+|Boys|Girls)\s*'  # age
+    #     r'(.*?)\s*'  # swimmer name
+    #     r'(?:[A-Z]+)?'  # optional qualifier (J, QT, Q, etc.)
+    #     r'(\d+)$'  # rank
+    # )
+
     for pattern in (swimmer_re_B, swimmer_re_C, swimmer_re_A):
         m = pattern.match(line)
         if not m:
             continue
+
+        print(f"following pattern: {pattern.pattern}")
 
         # -------------------------
         # Pattern B (most common in meet manager exports)
         # NCAC 2:03.56M21Whelehan, Colin H1
         # -------------------------
         if pattern == swimmer_re_B:
-            rank = int(m.group(5))
+            rank = int(m.group(7))
+
             seed_time = m.group(2)
-            age = m.group(3)
-            name = m.group(4).strip()
+
+            if m.group(3):
+                seed_time += m.group(3)
+
+            if m.group(6):
+                seed_time += " " + m.group(6)
+
+            age = m.group(4)
+            name = m.group(5).strip()
             team = m.group(1)
+            print("pattern B")
 
         # -------------------------
         # Pattern C (rank-first layouts)
@@ -151,6 +190,8 @@ def parse_swimmer_line(line, current_event, current_gender):
             age = m.group(3)
             team = m.group(4)
             seed_time = m.group(5)
+            print("pattern C")
+
 
         # -------------------------
         # Pattern A (compact layouts)
@@ -161,6 +202,8 @@ def parse_swimmer_line(line, current_event, current_gender):
             age = m.group(3)
             name = m.group(4).strip()
             team = m.group(1)
+            print("pattern A")
+
 
         swimmer = Swimmer(
             name=name,
