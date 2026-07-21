@@ -40,7 +40,7 @@ def clean_line(line):
             .replace("Crutchﬁeld", "Crutchfield")
             .replace("-NC", "")
             .replace("New Wave Swim Te", "WAVE-NC")
-            .replace("SwimMac Carolina", "MAC-NC")
+            .replace("SwimMAC Carolina", "MAC-NC")
             .replace("North Carolina A", "NCAC-NC")
             .replace("Tac Titans", "TAC-NC")
             .strip()
