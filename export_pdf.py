@@ -18,7 +18,7 @@ class PDF(FPDF):
         self.set_y(-15)  # <-- this is the key
         self.set_font("DejaVu", "B", 8)
         footer_text = (
-            f"For entertainment only — generated from the psych sheet; not an official meet document. Good luck swimmers!       "
+            f"For entertainment purposes only — Generated from the uploaded psych sheet. Swimmers with identical seed times are assigned according to their order in the psych sheet. Official heat and lane assignments may differ. Good luck, swimmers!"
             f"Page {self.page_no()} of {{nb}}"
         )
         self.cell(0, 8, footer_text, ln=1, align="C")
