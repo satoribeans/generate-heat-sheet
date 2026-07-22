@@ -110,21 +110,21 @@ def generate_pdf(meet, favorites_entries):
     
             # Table header
             pdf.set_font("DejaVu", "B", 10)
-            pdf.cell(20, 6, "", 0, 0)  # indent
+            pdf.cell(10, 6, "", 0, 0)  # indent
             pdf.cell(15, 6, "Event", 1, 0, "C")
             pdf.cell(95, 6, "Event Name", 1, 0, "C")
             pdf.cell(20, 6, "Heat", 1, 0,"C")
             pdf.cell(15, 6, "Lane", 1, 0, "C")
-            pdf.cell(20, 6, "Time", 1, 1, "C")
+            pdf.cell(30, 6, "Time", 1, 1, "C")
             # Rows under swimmer
             pdf.set_font("DejaVu", "", 9)
             for entry in entries:
-                pdf.cell(20, 6, "", 0, 0)  # indent
+                pdf.cell(10, 6, "", 0, 0)  # indent
                 pdf.cell(15, 6, str(entry.event.event_number), 1, 0, "C")
                 pdf.cell(95, 6, entry.event.name, 1, 0, "L")
                 pdf.cell(20, 6, f"{entry.heat_number} of {len(entry.event.heats)}", 1, 0, "C")
                 pdf.cell(15, 6, str(entry.lane_number), 1, 0, "C")
-                pdf.cell(20, 6, entry.entry_time, 1, 1, "R")
+                pdf.cell(30, 6, entry.entry_time, 1, 1, "R")
             pdf.ln(2)
 
     # --------------------------------------------------
